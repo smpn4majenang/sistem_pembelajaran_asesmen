@@ -1,513 +1,518 @@
-import React, { useState, useEffect } from 'react';
-import { BookOpen, Search, User, ChevronLeft, School, Table, FileInput, AlertCircle, Settings, X, ExternalLink, ClipboardList, BookMarked } from 'lucide-react';
-
-// --- MOCK DATA (DATA DEMO) ---
-// Diperbarui: linkJurnal dipecah menjadi linkJurnalGuru dan linkJurnalKelas
-const DEMO_TEACHERS = [
-  { id: 1, name: "Drs. Budi Santoso", subject: "Matematika", linkInput: "#", linkCek: "#", linkJurnalGuru: "#", linkJurnalKelas: "#" },
-  { id: 2, name: "Siti Aminah, S.Pd", subject: "Bahasa Indonesia", linkInput: "#", linkCek: "#", linkJurnalGuru: "#", linkJurnalKelas: "#" },
-  { id: 3, name: "Rahmat Hidayat, S.Pd", subject: "IPA", linkInput: "#", linkCek: "#", linkJurnalGuru: "#", linkJurnalKelas: "#" },
-  { id: 4, name: "Dewi Lestari, S.Pd", subject: "Bahasa Inggris", linkInput: "#", linkCek: "#", linkJurnalGuru: "#", linkJurnalKelas: "#" },
-  { id: 5, name: "Agus Prasetyo, S.Kom", subject: "TIK", linkInput: "#", linkCek: "#", linkJurnalGuru: "#", linkJurnalKelas: "#" },
-  { id: 6, name: "Sri Wahyuni, S.Pd", subject: "IPS", linkInput: "#", linkCek: "#", linkJurnalGuru: "#", linkJurnalKelas: "#" },
-  { id: 7, name: "Bambang Suherman, S.Pd", subject: "PJOK", linkInput: "#", linkCek: "#", linkJurnalGuru: "#", linkJurnalKelas: "#" },
-  { id: 8, name: "Endang Susanti, S.Ag", subject: "PAI", linkInput: "#", linkCek: "#", linkJurnalGuru: "#", linkJurnalKelas: "#" },
-  { id: 9, name: "Eko Purnomo, S.Pd", subject: "Seni Budaya", linkInput: "#", linkCek: "#", linkJurnalGuru: "#", linkJurnalKelas: "#" },
-  { id: 10, name: "Yuni Astuti, S.Pd", subject: "PKn", linkInput: "#", linkCek: "#", linkJurnalGuru: "#", linkJurnalKelas: "#" },
-];
-
-export default function App() {
-  // State Management
-  const [view, setView] = useState('home'); // home, list, action
-  const [actionType, setActionType] = useState(null); // 'input', 'check', 'jurnalGuru', 'jurnalKelas'
-  const [selectedTeacher, setSelectedTeacher] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  // Data State
-  const [sheetId, setSheetId] = useState(''); // ID Google Sheet
-  const [teachers, setTeachers] = useState(DEMO_TEACHERS);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [showSettings, setShowSettings] = useState(false);
-  const [isUsingDemo, setIsUsingDemo] = useState(true);
-
-  // --- LOGIC FETCH DATA GOOGLE SHEET ---
-  const fetchSheetData = async (id) => {
-    if (!id) return;
-    setLoading(true);
-    setError(null);
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pembelajaran & Asesmen - SMPN 4 Majenang</title>
     
-    try {
-      // URL CSV Export Google Sheet
-      const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`;
-      
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Gagal mengambil data. Pastikan Sheet bersifat Publik.");
-      
-      const text = await response.text();
-      const rows = parseCSV(text);
-      
-      // Transformasi array CSV menjadi object
-      // Update Kolom: 
-      // [0] Nama, [1] Mapel, [2] Link Input, [3] Link Cek, [4] Link Jurnal Guru, [5] Link Jurnal Kelas
-      const formattedData = rows.slice(1).map((row, index) => ({
-        id: index,
-        name: row[0] || "Nama Tidak Ada",
-        subject: row[1] || "Mapel Umum",
-        linkInput: row[2] || "#",
-        linkCek: row[3] || "#",
-        linkJurnalGuru: row[4] || "#",
-        linkJurnalKelas: row[5] || "#"
-      })).filter(item => item.name !== "Nama Tidak Ada");
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-      setTeachers(formattedData);
-      setIsUsingDemo(false);
-      setShowSettings(false);
-    } catch (err) {
-      console.error(err);
-      setError("Gagal memuat data. Periksa ID Sheet atau pastikan Sheet 'Siapa saja yang memiliki link' (Public).");
-    } finally {
-      setLoading(false);
-    }
-  };
+    <!-- Custom Font (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  // Parser CSV Sederhana
-  const parseCSV = (text) => {
-    const rows = [];
-    let currentRow = [];
-    let currentCell = "";
-    let insideQuotes = false;
-
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-      if (char === '"') {
-        insideQuotes = !insideQuotes;
-      } else if (char === ',' && !insideQuotes) {
-        currentRow.push(currentCell.trim());
-        currentCell = "";
-      } else if (char === '\n' && !insideQuotes) {
-        currentRow.push(currentCell.trim());
-        rows.push(currentRow);
-        currentRow = [];
-        currentCell = "";
-      } else {
-        currentCell += char;
-      }
-    }
-    if (currentCell) currentRow.push(currentCell.trim());
-    if (currentRow.length > 0) rows.push(currentRow);
-    return rows;
-  };
-
-  // --- NAVIGATION HANDLERS ---
-  const handleMenuClick = (type) => {
-    setActionType(type);
-    setView('list');
-    setSearchTerm('');
-  };
-
-  const handleTeacherClick = (teacher) => {
-    setSelectedTeacher(teacher);
-    setView('action');
-  };
-
-  const handleBack = () => {
-    if (view === 'action') {
-      setView('list');
-      setSelectedTeacher(null);
-    } else if (view === 'list') {
-      setView('home');
-      setActionType(null);
-    }
-  };
-
-  // --- HELPER: GET THEME COLOR ---
-  const getThemeColor = (type) => {
-    switch(type) {
-      case 'input': return { main: 'green', bg: 'bg-green-50', text: 'text-green-800', border: 'border-green-500', iconBg: 'bg-green-100', iconText: 'text-green-600' };
-      case 'check': return { main: 'blue', bg: 'bg-blue-50', text: 'text-blue-800', border: 'border-blue-500', iconBg: 'bg-blue-100', iconText: 'text-blue-600' };
-      case 'jurnalGuru': return { main: 'orange', bg: 'bg-orange-50', text: 'text-orange-800', border: 'border-orange-500', iconBg: 'bg-orange-100', iconText: 'text-orange-600' };
-      case 'jurnalKelas': return { main: 'purple', bg: 'bg-purple-50', text: 'text-purple-800', border: 'border-purple-500', iconBg: 'bg-purple-100', iconText: 'text-purple-600' };
-      default: return { main: 'gray', bg: 'bg-gray-50', text: 'text-gray-800', border: 'border-gray-500', iconBg: 'bg-gray-100', iconText: 'text-gray-600' };
-    }
-  };
-
-  // --- COMPONENT: HEADER ---
-  const Header = () => (
-    <header className="bg-blue-800 text-white p-4 shadow-lg sticky top-0 z-50">
-      <div className="container mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-white p-2 rounded-full text-blue-800">
-            <School size={24} />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold leading-tight">SISTEM PEMBELAJARAN DAN ASESMEN</h1>
-            <p className="text-xs text-blue-200">Sistem Pembelajaran dan Asesmen SMP Negeri 4 Majenang</p>
-          </div>
-        </div>
-        <button 
-          onClick={() => setShowSettings(true)}
-          className="p-2 hover:bg-blue-700 rounded-full transition-colors"
-          title="Pengaturan Data"
-        >
-          <Settings size={20} />
-        </button>
-      </div>
-    </header>
-  );
-
-  // --- COMPONENT: SETTINGS MODAL ---
-  const SettingsModal = () => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
-        <div className="bg-gray-100 p-4 flex justify-between items-center border-b sticky top-0">
-          <h3 className="font-bold text-gray-800">Pengaturan Data Guru</h3>
-          <button onClick={() => setShowSettings(false)} className="text-gray-500 hover:text-red-500">
-            <X size={20} />
-          </button>
-        </div>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
         
-        <div className="p-6 space-y-4">
-          <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-800 border border-blue-200">
-            <p className="font-semibold mb-1">Struktur Google Sheet:</p>
-            <ol className="list-decimal ml-4 space-y-1">
-              <li>Buat Sheet baru. Baris 1 untuk Header.</li>
-              <li>Kolom A: <strong>Nama Guru</strong></li>
-              <li>Kolom B: <strong>Mata Pelajaran</strong></li>
-              <li>Kolom C: <strong>Link Form Input Nilai</strong></li>
-              <li>Kolom D: <strong>Link Spreadsheet Cek Nilai</strong></li>
-              <li>Kolom E: <strong>Link Form Jurnal Guru</strong> <span className="text-[10px] bg-orange-200 px-1 rounded text-orange-800">Baru</span></li>
-              <li>Kolom F: <strong>Link Form Jurnal Kelas</strong> <span className="text-[10px] bg-purple-200 px-1 rounded text-purple-800">Baru</span></li>
-              <li className="mt-2">Klik <strong>File {'>'} Bagikan {'>'} Publikasikan ke web</strong>.</li>
-              <li>Pilih format <strong>CSV</strong>.</li>
-              <li>Ambil ID dari URL browser (antara /d/ dan /edit).</li>
-            </ol>
-          </div>
+        /* Animation Utilities */
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        .slide-up { animation: slideUp 0.5s ease-out; }
+        .slide-right { animation: slideRight 0.3s ease-out; }
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              ID Google Sheet
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={sheetId}
-                onChange={(e) => setSheetId(e.target.value)}
-                placeholder="Contoh: 1BxiMvs..."
-                className="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <button
-                onClick={() => fetchSheetData(sheetId)}
-                disabled={loading || !sheetId}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading ? '...' : 'Muat'}
-              </button>
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        /* Hide Scrollbar for cleaner look in modals */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 flex flex-col min-h-screen">
+
+    <!-- HEADER -->
+    <header class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-white p-1.5 rounded-lg text-blue-900 shadow-sm">
+                    <i data-lucide="school" width="22"></i>
+                </div>
+                <div class="leading-tight">
+                    <h1 class="text-base md:text-lg font-bold">SISTEM PEMBELAJARAN DAN ASESMEN</h1>
+                    <p class="text-[10px] md:text-xs text-blue-200 opacity-90">SMP NEGERI 4 MAJENANG</p>
+                </div>
             </div>
-            {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-          </div>
-
-          <div className="pt-2 border-t">
-            <button 
-              onClick={() => {
-                setTeachers(DEMO_TEACHERS);
-                setIsUsingDemo(true);
-                setShowSettings(false);
-              }}
-              className="text-gray-500 text-sm hover:text-gray-800 underline w-full text-center"
-            >
-              Gunakan Data Demo Saja
+            <button onclick="openSettings()" class="p-2 hover:bg-blue-800 rounded-full transition-colors" title="Pengaturan">
+                <i data-lucide="settings" width="20"></i>
             </button>
-          </div>
         </div>
-      </div>
+    </header>
+
+    <!-- DEMO BANNER -->
+    <div id="demo-banner" class="hidden bg-indigo-600 text-white px-4 py-2 text-center text-xs font-medium">
+        Mode Demo Aktif. <button onclick="openSettings()" class="underline hover:text-indigo-200 ml-1">Klik di sini</button> untuk menghubungkan data sekolah.
     </div>
-  );
 
-  // --- VIEW: HOME ---
-  const HomeView = () => (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 gap-6 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Selamat Datang</h2>
-        <p className="text-gray-600">Silakan pilih menu layanan di bawah ini</p>
-      </div>
+    <!-- MAIN CONTENT CONTAINER -->
+    <main id="app-container" class="flex-1 flex flex-col relative">
+        <!-- Views will be injected here via JavaScript -->
+    </main>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl px-4">
-        {/* Menu Input */}
-        <button 
-          onClick={() => handleMenuClick('input')}
-          className="group relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 p-6 flex flex-col items-center text-center gap-4 hover:-translate-y-1"
-        >
-          <div className="absolute top-0 left-0 w-full h-2 bg-green-500" />
-          <div className="bg-green-100 p-4 rounded-full text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors duration-300">
-            <FileInput size={32} />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-800">Input Nilai</h3>
-            <p className="text-sm text-gray-500 mt-2">Guru memasukkan nilai siswa</p>
-          </div>
-          <div className="mt-auto pt-4 w-full">
-            <div className="px-4 py-2 bg-gray-50 rounded-full text-sm text-gray-600 font-medium group-hover:bg-green-50 group-hover:text-green-700">
-              Buka &rarr;
-            </div>
-          </div>
-        </button>
-
-        {/* Menu Cek */}
-        <button 
-          onClick={() => handleMenuClick('check')}
-          className="group relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 p-6 flex flex-col items-center text-center gap-4 hover:-translate-y-1"
-        >
-          <div className="absolute top-0 left-0 w-full h-2 bg-blue-500" />
-          <div className="bg-blue-100 p-4 rounded-full text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-            <Table size={32} />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-800">Cek Nilai</h3>
-            <p className="text-sm text-gray-500 mt-2">Lihat rekapitulasi nilai</p>
-          </div>
-          <div className="mt-auto pt-4 w-full">
-            <div className="px-4 py-2 bg-gray-50 rounded-full text-sm text-gray-600 font-medium group-hover:bg-blue-50 group-hover:text-blue-700">
-              Buka &rarr;
-            </div>
-          </div>
-        </button>
-
-        {/* Menu Jurnal Guru - NEW */}
-        <button 
-          onClick={() => handleMenuClick('jurnalGuru')}
-          className="group relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 p-6 flex flex-col items-center text-center gap-4 hover:-translate-y-1"
-        >
-          <div className="absolute top-0 left-0 w-full h-2 bg-orange-500" />
-          <div className="bg-orange-100 p-4 rounded-full text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors duration-300">
-            <ClipboardList size={32} />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-800">Jurnal Guru</h3>
-            <p className="text-sm text-gray-500 mt-2">Catatan harian mengajar guru</p>
-          </div>
-          <div className="mt-auto pt-4 w-full">
-            <div className="px-4 py-2 bg-gray-50 rounded-full text-sm text-gray-600 font-medium group-hover:bg-orange-50 group-hover:text-orange-700">
-              Buka &rarr;
-            </div>
-          </div>
-        </button>
-
-        {/* Menu Jurnal Kelas - NEW */}
-        <button 
-          onClick={() => handleMenuClick('jurnalKelas')}
-          className="group relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 p-6 flex flex-col items-center text-center gap-4 hover:-translate-y-1"
-        >
-          <div className="absolute top-0 left-0 w-full h-2 bg-purple-500" />
-          <div className="bg-purple-100 p-4 rounded-full text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
-            <BookMarked size={32} />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-800">Jurnal Kelas</h3>
-            <p className="text-sm text-gray-500 mt-2">Absensi dan catatan kelas</p>
-          </div>
-          <div className="mt-auto pt-4 w-full">
-            <div className="px-4 py-2 bg-gray-50 rounded-full text-sm text-gray-600 font-medium group-hover:bg-purple-50 group-hover:text-purple-700">
-              Buka &rarr;
-            </div>
-          </div>
-        </button>
-      </div>
-    </div>
-  );
-
-  // --- VIEW: TEACHER LIST ---
-  const TeacherListView = () => {
-    const filteredTeachers = teachers.filter(t => 
-      t.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      t.subject.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const theme = getThemeColor(actionType);
-
-    // Judul Menu berdasarkan tipe
-    let menuTitle = "";
-    if (actionType === 'input') menuTitle = "Input Nilai";
-    else if (actionType === 'check') menuTitle = "Cek Nilai";
-    else if (actionType === 'jurnalGuru') menuTitle = "Jurnal Guru";
-    else if (actionType === 'jurnalKelas') menuTitle = "Jurnal Kelas";
-
-    return (
-      <div className="container mx-auto p-4 max-w-5xl animate-in fade-in duration-300">
-        {/* Navigation & Title */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <button 
-            onClick={handleBack}
-            className="flex items-center text-gray-600 hover:text-gray-900 font-medium transition-colors self-start"
-          >
-            <ChevronLeft size={20} />
-            Kembali ke Menu Utama
-          </button>
-          
-          <div className={`px-4 py-2 rounded-lg font-bold text-lg border-l-4 ${theme.bg} ${theme.text} ${theme.border}`}>
-            Menu: {menuTitle}
-          </div>
+    <!-- FOOTER -->
+    <footer id="main-footer" class="bg-white border-t py-6 mt-auto">
+        <div class="container mx-auto text-center text-sm text-gray-500">
+            <p class="font-semibold text-gray-700">&copy; <span id="year"></span> SMP Negeri 4 Majenang</p>
+            <p class="text-xs mt-1">Sistem Pembelajaran dan Asesmen SMP Negeri 4 Majenang</p>
         </div>
+    </footer>
 
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <input
-            type="text"
-            placeholder="Cari nama guru atau mata pelajaran..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-          />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-        </div>
-
-        {/* Grid List */}
-        {filteredTeachers.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTeachers.map((teacher) => (
-              <button
-                key={teacher.id}
-                onClick={() => handleTeacherClick(teacher)}
-                className={`flex items-start gap-4 p-4 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group hover:border-${theme.main}-200`}
-              >
-                <div className={`p-3 rounded-full ${theme.iconBg} ${theme.iconText} group-hover:scale-110 transition-transform`}>
-                  <User size={24} />
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 fade-in">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
+            <div class="bg-gray-50 p-4 flex justify-between items-center border-b">
+                <h3 class="font-bold text-gray-800">Pengaturan Data</h3>
+                <button onclick="closeSettings()" class="text-gray-400 hover:text-red-500 transition-colors">
+                    <i data-lucide="x" width="20"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="bg-blue-50 p-3 rounded-lg text-sm text-blue-800 border border-blue-200">
+                    <p class="font-semibold mb-2">Format Kolom Google Sheet (Sheet1):</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="font-bold text-xs uppercase text-gray-500 mb-1">Data Guru (Kiri)</p>
+                            <ul class="text-xs space-y-1 list-disc ml-4">
+                                <li>A: Nama Guru</li>
+                                <li>B: Mata Pelajaran</li>
+                                <li>C: Link Input Nilai</li>
+                                <li>D: Link Cek Nilai</li>
+                                <li>E: Link Jurnal Guru</li>
+                            </ul>
+                        </div>
+                        <div class="border-l pl-4 border-blue-200">
+                            <p class="font-bold text-xs uppercase text-purple-600 mb-1">Data Kelas (Kanan)</p>
+                            <ul class="text-xs space-y-1 list-disc ml-4">
+                                <li>G: Nama Kelas (cth: 7A)</li>
+                                <li>H: Link Jurnal Kelas</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="text-[10px] mt-2 italic text-blue-600">*Pastikan Kolom F dikosongkan sebagai pemisah.</p>
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-800 line-clamp-1">{teacher.name}</h4>
-                  <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
-                    <BookOpen size={14} />
-                    {teacher.subject}
-                  </p>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ID Google Sheet</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="sheet-id-input" placeholder="Contoh: 1BxiMvs..." class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                        <button onclick="loadSheetData()" id="btn-load" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
+                            Muat
+                        </button>
+                    </div>
+                    <p id="load-error" class="text-red-500 text-xs mt-2 hidden"></p>
                 </div>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-            <AlertCircle className="mx-auto mb-2" size={32} />
-            <p>Guru tidak ditemukan.</p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // --- VIEW: ACTION (IFRAME/LINK) ---
-  const ActionView = () => {
-    let link = "#";
-    let title = "";
-    
-    if (actionType === 'input') {
-      link = selectedTeacher.linkInput;
-      title = "Form Input Nilai";
-    } else if (actionType === 'check') {
-      link = selectedTeacher.linkCek;
-      title = "Data Hasil Nilai";
-    } else if (actionType === 'jurnalGuru') {
-      link = selectedTeacher.linkJurnalGuru;
-      title = "Jurnal Guru";
-    } else if (actionType === 'jurnalKelas') {
-      link = selectedTeacher.linkJurnalKelas;
-      title = "Jurnal Kelas";
-    }
-
-    const isInvalidLink = !link || link === '#' || link.length < 5;
-    const theme = getThemeColor(actionType);
-
-    return (
-      <div className="flex flex-col h-[calc(100vh-80px)] animate-in slide-in-from-right-4 duration-300">
-        {/* Header Action */}
-        <div className="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm flex-shrink-0">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <button 
-              onClick={handleBack}
-              className="p-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors"
-            >
-              <ChevronLeft size={24} />
-            </button>
-            <div className="border-l pl-3">
-              <h2 className="font-bold text-gray-800 text-sm md:text-base truncate">{selectedTeacher.name}</h2>
-              <p className={`text-xs font-medium ${theme.text}`}>
-                {title} - {selectedTeacher.subject}
-              </p>
-            </div>
-          </div>
-          
-          {!isInvalidLink && (
-            <a 
-              href={link} 
-              target="_blank" 
-              rel="noreferrer"
-              className={`hidden md:flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-gray-50 border transition-colors ${theme.text} border-gray-200`}
-            >
-              Buka di Tab Baru <ExternalLink size={14} />
-            </a>
-          )}
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1 bg-gray-50 relative overflow-hidden">
-          {isInvalidLink ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-              <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md">
-                <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${theme.iconBg} ${theme.iconText}`}>
-                  <AlertCircle size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Link Belum Tersedia</h3>
-                <p className="text-gray-600 mb-6">
-                  Maaf, link <strong>{title}</strong> untuk 
-                  <span className="font-semibold"> {selectedTeacher.name} </span> 
-                  belum dikonfigurasi di database (Google Sheet).
-                </p>
-                <button 
-                  onClick={handleBack}
-                  className="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors"
-                >
-                  Kembali
+                <button onclick="useDemoData()" class="w-full py-2 text-gray-500 text-sm hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors">
+                    Gunakan Data Demo
                 </button>
-              </div>
             </div>
-          ) : (
-            <iframe 
-              src={link} 
-              title="Content Frame"
-              className="w-full h-full border-none"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-            />
-          )}
         </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      <Header />
-      
-      {isUsingDemo && !showSettings && view === 'home' && (
-        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 text-center text-xs text-yellow-800">
-          Anda sedang menggunakan <strong>Mode Demo</strong>. Klik ikon gerigi di pojok kanan atas untuk menghubungkan data Google Sheet Anda.
-        </div>
-      )}
-
-      {showSettings && <SettingsModal />}
-
-      <main>
-        {view === 'home' && <HomeView />}
-        {view === 'list' && <TeacherListView />}
-        {view === 'action' && <ActionView />}
-      </main>
-
-      {/* Footer Simple */}
-      {view !== 'action' && (
-        <footer className="bg-white border-t mt-auto py-6">
-          <div className="container mx-auto text-center text-sm text-gray-500">
-            <p>&copy; {new Date().getFullYear()} SMP Negeri 4 Majenang. All rights reserved.</p>
-            <p className="text-xs mt-1">Sistem Informasi Manajemen Penilaian</p>
-          </div>
-        </footer>
-      )}
     </div>
-  );
-}
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA & STATE ---
+        const DEMO_TEACHERS = [
+            { id: 1, name: "Drs. Budi Santoso", subject: "Matematika", linkInput: "#", linkCek: "#", linkJurnalGuru: "#" },
+            { id: 2, name: "Siti Aminah, S.Pd", subject: "Bahasa Indonesia, Prakarya", linkInput: "#", linkCek: "#", linkJurnalGuru: "#" },
+            { id: 3, name: "Rahmat Hidayat, S.Pd", subject: "IPA", linkInput: "#", linkCek: "#", linkJurnalGuru: "#" },
+            { id: 4, name: "Dewi Lestari, S.Pd", subject: "Bahasa Inggris", linkInput: "#", linkCek: "#", linkJurnalGuru: "#" },
+            { id: 5, name: "Agus Prasetyo, S.Kom", subject: "TIK, Informatika", linkInput: "#", linkCek: "#", linkJurnalGuru: "#" },
+        ];
+
+        const DEMO_CLASSES = [
+            { id: 'c1', name: "Kelas 7A", linkJurnal: "#" },
+            { id: 'c2', name: "Kelas 7B", linkJurnal: "#" },
+            { id: 'c3', name: "Kelas 7C", linkJurnal: "#" },
+            { id: 'c4', name: "Kelas 8A", linkJurnal: "#" },
+            { id: 'c5', name: "Kelas 8B", linkJurnal: "#" },
+            { id: 'c6', name: "Kelas 9A", linkJurnal: "#" },
+        ];
+
+        let state = {
+            view: 'home', // home, list, action
+            actionType: null, // input, check, jurnalGuru, jurnalKelas
+            selectedItem: null,
+            searchTerm: '',
+            teachers: [...DEMO_TEACHERS],
+            classes: [...DEMO_CLASSES],
+            isUsingDemo: true
+        };
+
+        // --- INIT ---
+        document.getElementById('year').textContent = new Date().getFullYear();
+        render();
+
+        // --- RENDER FUNCTION ---
+        function render() {
+            const container = document.getElementById('app-container');
+            const footer = document.getElementById('main-footer');
+            const demoBanner = document.getElementById('demo-banner');
+
+            // Update Icons
+            setTimeout(() => lucide.createIcons(), 50);
+
+            // Toggle Demo Banner
+            demoBanner.classList.toggle('hidden', !state.isUsingDemo || state.view !== 'home');
+
+            // Toggle Footer
+            footer.style.display = state.view === 'action' ? 'none' : 'block';
+
+            // Router Logic
+            if (state.view === 'home') {
+                container.innerHTML = renderHome();
+            } else if (state.view === 'list') {
+                container.innerHTML = renderList();
+            } else if (state.view === 'action') {
+                container.innerHTML = renderAction();
+            }
+        }
+
+        // --- VIEWS ---
+        function renderHome() {
+            return `
+                <div class="flex flex-col items-center justify-center min-h-[75vh] p-4 slide-up">
+                    <div class="text-center mb-8 max-w-lg mx-auto">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Menu Layanan</h2>
+                        <p class="text-gray-500 text-sm md:text-base">Silakan pilih menu layanan akademik yang Anda butuhkan di bawah ini.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 w-full max-w-6xl px-2 md:px-6">
+                        ${renderHomeButton('input', 'Input Nilai', 'Form Nilai Guru', 'file-input', 'green')}
+                        ${renderHomeButton('check', 'Cek Nilai', 'Rekap Nilai Siswa', 'table', 'blue')}
+                        ${renderHomeButton('jurnalGuru', 'Jurnal Guru', 'Agenda Harian Guru', 'clipboard-list', 'orange')}
+                        ${renderHomeButton('jurnalKelas', 'Jurnal Kelas', 'Absensi Siswa/Kelas', 'book-marked', 'purple')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHomeButton(id, label, desc, icon, color) {
+            return `
+                <button onclick="handleMenuClick('${id}')" 
+                    class="group relative overflow-hidden bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 p-5 flex flex-col items-center text-center gap-3 hover:-translate-y-1 ring-1 ring-transparent hover:ring-${color}-200">
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-${color}-500"></div>
+                    <div class="p-3.5 rounded-full bg-${color}-50 text-${color}-600 group-hover:bg-${color}-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                        <i data-lucide="${icon}" width="28"></i>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-center">
+                        <h3 class="text-lg font-bold text-gray-800">${label}</h3>
+                        <p class="text-xs text-gray-500 mt-1">${desc}</p>
+                    </div>
+                    <div class="mt-2 w-full py-2 bg-gray-50 rounded-lg text-xs font-semibold text-gray-600 group-hover:bg-${color}-50 group-hover:text-${color}-700 transition-colors">
+                        Buka Menu
+                    </div>
+                </button>
+            `;
+        }
+
+        function renderList() {
+            const isClassMode = state.actionType === 'jurnalKelas';
+            const dataSource = isClassMode ? state.classes : state.teachers;
+            
+            const filtered = dataSource.filter(item => 
+                item.name.toLowerCase().includes(state.searchTerm.toLowerCase()) || 
+                (item.subject && item.subject.toLowerCase().includes(state.searchTerm.toLowerCase()))
+            );
+
+            const theme = getThemeColor(state.actionType);
+            const menuTitleMap = { input: "Input Nilai", check: "Cek Nilai", jurnalGuru: "Jurnal Guru", jurnalKelas: "Jurnal Kelas" };
+            const menuTitle = menuTitleMap[state.actionType];
+
+            let listHtml = '';
+            if (filtered.length > 0) {
+                listHtml = filtered.map(item => {
+                    // Logic untuk memecah mata pelajaran jika lebih dari satu
+                    let subHtml = '';
+                    if (isClassMode) {
+                        subHtml = `
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="external-link" width="16" class="text-${theme}-600 shrink-0"></i> 
+                                <span class="font-bold text-${theme}-700">Link Jurnal Kelas</span>
+                            </div>`;
+                    } else {
+                        // Pisahkan berdasarkan koma dan hapus spasi berlebih
+                        const subjects = item.subject.split(',').map(s => s.trim()).filter(s => s);
+                        subHtml = subjects.map(s => `
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="book-open" width="16" class="shrink-0 text-${theme}-600"></i> 
+                                <span class="truncate font-bold text-${theme}-700">${s}</span>
+                            </div>
+                        `).join('');
+                    }
+
+                    return `
+                    <button onclick='handleItemClick(${JSON.stringify(item).replace(/'/g, "&#39;")})'
+                        class="flex items-start gap-3 p-4 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all text-left group ring-1 ring-transparent hover:border-${theme}-300">
+                        <div class="mt-1 p-2.5 rounded-full bg-${theme}-100 text-${theme}-600 group-hover:scale-110 transition-transform shrink-0">
+                            <i data-lucide="${isClassMode ? 'users' : 'user'}" width="20"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="font-bold text-gray-900 text-base md:text-lg truncate mb-1">${item.name}</h4>
+                            <div class="text-sm flex flex-col gap-1">
+                                ${subHtml}
+                            </div>
+                        </div>
+                    </button>
+                    `;
+                }).join('');
+            } else {
+                listHtml = `
+                    <div class="flex flex-col items-center justify-center py-16 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200 col-span-full">
+                        <i data-lucide="search" width="48" class="mb-2 opacity-20"></i>
+                        <p>Data ${isClassMode ? 'kelas' : 'guru'} tidak ditemukan.</p>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="container mx-auto p-4 max-w-5xl fade-in min-h-[80vh]">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <button onclick="handleBack()" class="flex items-center text-gray-600 hover:text-gray-900 font-medium transition-colors gap-1 pl-1">
+                            <i data-lucide="chevron-left" width="20"></i> Kembali
+                        </button>
+                        <div class="px-4 py-1.5 rounded-full text-sm font-bold bg-${theme}-50 text-${theme}-800 border border-${theme}-500 self-start md:self-auto">
+                            ${menuTitle}
+                        </div>
+                    </div>
+
+                    <div class="relative mb-6 group">
+                        <input
+                            type="text"
+                            oninput="handleSearch(this.value)"
+                            value="${state.searchTerm}"
+                            placeholder="${isClassMode ? 'Cari nama kelas...' : 'Cari nama guru atau mapel...'}"
+                            class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all group-hover:border-blue-300"
+                        >
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <i data-lucide="search" width="20"></i>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                        ${listHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAction() {
+            const item = state.selectedItem;
+            let link = "#";
+            let title = "";
+            let subTitle = item.type === 'class' ? 'Absensi & Jurnal' : item.subject;
+
+            if (state.actionType === 'input') { link = item.linkInput; title = "Input Nilai"; }
+            else if (state.actionType === 'check') { link = item.linkCek; title = "Data Nilai"; }
+            else if (state.actionType === 'jurnalGuru') { link = item.linkJurnalGuru; title = "Jurnal Guru"; }
+            else if (state.actionType === 'jurnalKelas') { link = item.linkJurnal; title = "Jurnal Kelas"; }
+
+            const isInvalid = !link || link === '#' || link.length < 5;
+            const theme = getThemeColor(state.actionType);
+
+            let contentHtml = '';
+            if (isInvalid) {
+                contentHtml = `
+                    <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md border border-gray-100">
+                            <div class="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-${theme}-100 text-${theme}-600">
+                                <i data-lucide="alert-circle" width="32"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Link Belum Tersedia</h3>
+                            <p class="text-gray-600 mb-6 text-sm">
+                                Maaf, link untuk <strong>${item.name}</strong> belum diatur oleh admin.
+                            </p>
+                            <button onclick="handleBack()" class="px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors text-sm font-medium">
+                                Kembali
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                contentHtml = `
+                    <div class="absolute top-0 left-0 w-full bg-yellow-50 px-4 py-2 text-[10px] md:text-xs text-yellow-800 flex items-center justify-center gap-2 border-b border-yellow-100 z-10">
+                        <i data-lucide="info" width="14"></i>
+                        <span>Jika halaman kosong, klik tombol <strong>"Buka di Tab Baru"</strong>.</span>
+                    </div>
+                    <iframe 
+                        src="${link}" 
+                        class="w-full h-full border-none pt-8" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation">
+                    </iframe>
+                `;
+            }
+
+            return `
+                <div class="flex flex-col h-[calc(100vh-64px)] bg-gray-50 slide-right">
+                    <div class="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm z-20">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <button onclick="handleBack()" class="p-2 -ml-2 hover:bg-gray-100 rounded-full text-gray-600 transition-colors">
+                                <i data-lucide="chevron-left" width="24"></i>
+                            </button>
+                            <div class="border-l pl-3 border-gray-200">
+                                <h2 class="font-bold text-gray-800 text-sm md:text-base truncate max-w-[150px] md:max-w-md">${item.name}</h2>
+                                <p class="text-[10px] md:text-xs font-bold text-${theme}-800 uppercase tracking-wide">
+                                    ${title} &bull; ${subTitle}
+                                </p>
+                            </div>
+                        </div>
+                        ${!isInvalid ? `
+                        <a href="${link}" target="_blank" class="flex items-center gap-2 text-xs md:text-sm font-medium px-3 py-2 rounded-lg hover:bg-${theme}-50 border border-gray-200 hover:border-${theme}-200 transition-colors text-${theme}-800">
+                            <span class="hidden sm:inline">Buka di Tab Baru</span>
+                            <span class="sm:hidden">Buka</span>
+                            <i data-lucide="external-link" width="14"></i>
+                        </a>` : ''}
+                    </div>
+                    <div class="flex-1 relative w-full h-full bg-white">
+                        ${contentHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- ACTIONS ---
+        function handleMenuClick(type) {
+            state.actionType = type;
+            state.view = 'list';
+            state.searchTerm = '';
+            render();
+        }
+
+        function handleItemClick(item) {
+            state.selectedItem = item;
+            state.view = 'action';
+            render();
+        }
+
+        function handleBack() {
+            if (state.view === 'action') {
+                state.view = 'list';
+                state.selectedItem = null;
+            } else if (state.view === 'list') {
+                state.view = 'home';
+                state.actionType = null;
+            }
+            render();
+        }
+
+        function handleSearch(val) {
+            state.searchTerm = val;
+            render();
+            // Refocus input after render (simple hack for vanilla JS re-render)
+            const input = document.querySelector('input[type="text"]');
+            if(input) {
+                input.focus();
+                input.setSelectionRange(input.value.length, input.value.length);
+            }
+        }
+
+        function getThemeColor(type) {
+            switch(type) {
+                case 'input': return 'green';
+                case 'check': return 'blue';
+                case 'jurnalGuru': return 'orange';
+                case 'jurnalKelas': return 'purple';
+                default: return 'gray';
+            }
+        }
+
+        // --- SETTINGS LOGIC ---
+        function openSettings() { document.getElementById('settings-modal').classList.remove('hidden'); }
+        function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
+
+        async function loadSheetData() {
+            const id = document.getElementById('sheet-id-input').value.trim();
+            const btn = document.getElementById('btn-load');
+            const err = document.getElementById('load-error');
+
+            if (!id) return;
+            
+            btn.textContent = '...';
+            btn.disabled = true;
+            err.classList.add('hidden');
+
+            try {
+                const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Gagal. Pastikan Sheet Publik.");
+                
+                const text = await response.text();
+                const rows = parseCSV(text);
+
+                // Parse Teachers (Cols A-E)
+                const loadedTeachers = rows.slice(1).map((row, index) => ({
+                    id: `t-${index}`,
+                    name: row[0] || "",
+                    subject: row[1] || "Mapel Umum",
+                    linkInput: row[2] || "#",
+                    linkCek: row[3] || "#",
+                    linkJurnalGuru: row[4] || "#",
+                    type: 'teacher'
+                })).filter(t => t.name !== "" && t.name.toLowerCase() !== "nama guru");
+
+                // Parse Classes (Cols G-H)
+                const loadedClasses = rows.slice(1).map((row, index) => ({
+                    id: `c-${index}`,
+                    name: row[6] || "",
+                    linkJurnal: row[7] || "#",
+                    type: 'class'
+                })).filter(c => c.name !== "" && c.name.toLowerCase() !== "nama kelas");
+
+                state.teachers = loadedTeachers;
+                state.classes = loadedClasses;
+                state.isUsingDemo = false;
+                closeSettings();
+                
+                // Reset to home to show update
+                state.view = 'home';
+                render();
+
+            } catch (e) {
+                console.error(e);
+                err.textContent = "Gagal memuat. Periksa ID Sheet & Izin Akses.";
+                err.classList.remove('hidden');
+            } finally {
+                btn.textContent = 'Muat';
+                btn.disabled = false;
+            }
+        }
+
+        function useDemoData() {
+            state.teachers = [...DEMO_TEACHERS];
+            state.classes = [...DEMO_CLASSES];
+            state.isUsingDemo = true;
+            closeSettings();
+            state.view = 'home';
+            render();
+        }
+
+        function parseCSV(text) {
+            const rows = [];
+            let currentRow = [];
+            let currentCell = "";
+            let insideQuotes = false;
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char === '"') { insideQuotes = !insideQuotes; }
+                else if (char === ',' && !insideQuotes) { currentRow.push(currentCell.trim()); currentCell = ""; }
+                else if (char === '\n' && !insideQuotes) { currentRow.push(currentCell.trim()); rows.push(currentRow); currentRow = []; currentCell = ""; }
+                else { currentCell += char; }
+            }
+            if (currentCell) currentRow.push(currentCell.trim());
+            if (currentRow.length > 0) rows.push(currentRow);
+            return rows;
+        }
+    </script>
+</body>
+</html>
