@@ -45,20 +45,20 @@
                     <p class="text-[10px] md:text-xs text-blue-200 opacity-90">SMP NEGERI 4 MAJENANG</p>
                 </div>
             </div>
-            <button onclick="openSettings()" class="p-2 hover:bg-blue-800 rounded-full transition-colors" title="Pengaturan">
-                <i data-lucide="settings" width="20"></i>
+            <!-- Tombol refresh data manual -->
+            <button onclick="window.location.reload()" class="p-2 hover:bg-blue-800 rounded-full transition-colors" title="Muat Ulang Data">
+                <i data-lucide="refresh-cw" width="20"></i>
             </button>
         </div>
     </header>
 
-    <!-- DEMO BANNER -->
-    <div id="demo-banner" class="hidden bg-indigo-600 text-white px-4 py-2 text-center text-xs font-medium">
-        Mode Demo Aktif. <button onclick="openSettings()" class="underline hover:text-indigo-200 ml-1">Klik di sini</button> untuk menghubungkan data sekolah.
-    </div>
-
     <!-- MAIN CONTENT CONTAINER -->
     <main id="app-container" class="flex-1 flex flex-col relative">
         <!-- Views will be injected here via JavaScript -->
+        <div class="flex flex-col items-center justify-center h-[80vh] text-gray-400">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900 mb-4"></div>
+            <p>Memuat data sistem...</p>
+        </div>
     </main>
 
     <!-- FOOTER -->
@@ -69,101 +69,68 @@
         </div>
     </footer>
 
-    <!-- SETTINGS MODAL -->
-    <div id="settings-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 fade-in">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden max-h-[90vh] overflow-y-auto">
-            <div class="bg-gray-50 p-4 flex justify-between items-center border-b">
-                <h3 class="font-bold text-gray-800">Pengaturan Data</h3>
-                <button onclick="closeSettings()" class="text-gray-400 hover:text-red-500 transition-colors">
-                    <i data-lucide="x" width="20"></i>
-                </button>
-            </div>
-            <div class="p-6 space-y-4">
-                <div class="bg-blue-50 p-3 rounded-lg text-sm text-blue-800 border border-blue-200">
-                    <p class="font-semibold mb-2">Format Kolom Google Sheet (Sheet1):</p>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="font-bold text-xs uppercase text-gray-500 mb-1">Data Guru (Kiri)</p>
-                            <ul class="text-xs space-y-1 list-disc ml-4">
-                                <li>A: Nama Guru</li>
-                                <li>B: Mata Pelajaran</li>
-                                <li>C: Link Input Nilai</li>
-                                <li>D: Link Cek Nilai</li>
-                                <li>E: Link Jurnal Guru</li>
-                            </ul>
-                        </div>
-                        <div class="border-l pl-4 border-blue-200">
-                            <p class="font-bold text-xs uppercase text-purple-600 mb-1">Data Kelas (Kanan)</p>
-                            <ul class="text-xs space-y-1 list-disc ml-4">
-                                <li>G: Nama Kelas (cth: 7A)</li>
-                                <li>H: Link Jurnal Kelas</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <p class="text-[10px] mt-2 italic text-blue-600">*Pastikan Kolom F dikosongkan sebagai pemisah.</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">ID Google Sheet</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="sheet-id-input" placeholder="Contoh: 1BxiMvs..." class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                        <button onclick="loadSheetData()" id="btn-load" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
-                            Muat
-                        </button>
-                    </div>
-                    <p id="load-error" class="text-red-500 text-xs mt-2 hidden"></p>
-                </div>
-                <button onclick="useDemoData()" class="w-full py-2 text-gray-500 text-sm hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors">
-                    Gunakan Data Demo
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- DATA & STATE ---
-        const DEMO_TEACHERS = [
-            { id: 1, name: "Drs. Budi Santoso", subject: "Matematika", linkInput: "#", linkCek: "#", linkJurnalGuru: "#" },
-            { id: 2, name: "Siti Aminah, S.Pd", subject: "Bahasa Indonesia, Prakarya", linkInput: "#", linkCek: "#", linkJurnalGuru: "#" },
-            { id: 3, name: "Rahmat Hidayat, S.Pd", subject: "IPA", linkInput: "#", linkCek: "#", linkJurnalGuru: "#" },
-            { id: 4, name: "Dewi Lestari, S.Pd", subject: "Bahasa Inggris", linkInput: "#", linkCek: "#", linkJurnalGuru: "#" },
-            { id: 5, name: "Agus Prasetyo, S.Kom", subject: "TIK, Informatika", linkInput: "#", linkCek: "#", linkJurnalGuru: "#" },
-        ];
-
-        const DEMO_CLASSES = [
-            { id: 'c1', name: "Kelas 7A", linkJurnal: "#" },
-            { id: 'c2', name: "Kelas 7B", linkJurnal: "#" },
-            { id: 'c3', name: "Kelas 7C", linkJurnal: "#" },
-            { id: 'c4', name: "Kelas 8A", linkJurnal: "#" },
-            { id: 'c5', name: "Kelas 8B", linkJurnal: "#" },
-            { id: 'c6', name: "Kelas 9A", linkJurnal: "#" },
-        ];
+        // =================================================================
+        // KONFIGURASI UTAMA (Paste ID Google Sheet di sini)
+        // =================================================================
+        const GOOGLE_SHEET_ID = "1TAq2LiT663wxPHwbWBnRN1KbkjBnGMwcU5PgsZWiQpg"; // <-- PASTE ID DI SINI (Contoh: "1BxiMvs...")
+        // =================================================================
 
         let state = {
             view: 'home', // home, list, action
             actionType: null, // input, check, jurnalGuru, jurnalKelas
             selectedItem: null,
             searchTerm: '',
-            teachers: [...DEMO_TEACHERS],
-            classes: [...DEMO_CLASSES],
-            isUsingDemo: true
+            teachers: [],
+            classes: [],
+            loading: true,
+            error: null
         };
 
         // --- INIT ---
         document.getElementById('year').textContent = new Date().getFullYear();
-        render();
+        
+        // Langsung muat data saat aplikasi dibuka
+        initApp();
+
+        async function initApp() {
+            if (!GOOGLE_SHEET_ID) {
+                renderError("ID Google Sheet belum dipasang di script. Silakan hubungi admin IT.");
+                return;
+            }
+
+            try {
+                const data = await fetchFromGoogleSheet(GOOGLE_SHEET_ID);
+                state.teachers = data.teachers;
+                state.classes = data.classes;
+                state.loading = false;
+                render(); 
+            } catch (e) {
+                console.error("Gagal memuat:", e);
+                renderError("Gagal memuat data dari Google Sheet. Pastikan ID benar dan Sheet dipublikasikan ke Web (CSV).");
+            }
+        }
+
+        function renderError(msg) {
+            const container = document.getElementById('app-container');
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-[80vh] p-8 text-center">
+                    <i data-lucide="alert-triangle" width="48" class="text-red-500 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Terjadi Kesalahan</h3>
+                    <p class="text-gray-600">${msg}</p>
+                </div>
+            `;
+            lucide.createIcons();
+        }
 
         // --- RENDER FUNCTION ---
         function render() {
             const container = document.getElementById('app-container');
             const footer = document.getElementById('main-footer');
-            const demoBanner = document.getElementById('demo-banner');
 
             // Update Icons
             setTimeout(() => lucide.createIcons(), 50);
-
-            // Toggle Demo Banner
-            demoBanner.classList.toggle('hidden', !state.isUsingDemo || state.view !== 'home');
 
             // Toggle Footer
             footer.style.display = state.view === 'action' ? 'none' : 'block';
@@ -232,7 +199,6 @@
             let listHtml = '';
             if (filtered.length > 0) {
                 listHtml = filtered.map(item => {
-                    // Logic untuk memecah mata pelajaran jika lebih dari satu
                     let subHtml = '';
                     if (isClassMode) {
                         subHtml = `
@@ -241,7 +207,6 @@
                                 <span class="font-bold text-${theme}-700">Link Jurnal Kelas</span>
                             </div>`;
                     } else {
-                        // Pisahkan berdasarkan koma dan hapus spasi berlebih
                         const subjects = item.subject.split(',').map(s => s.trim()).filter(s => s);
                         subHtml = subjects.map(s => `
                             <div class="flex items-center gap-2">
@@ -409,7 +374,6 @@
         function handleSearch(val) {
             state.searchTerm = val;
             render();
-            // Refocus input after render (simple hack for vanilla JS re-render)
             const input = document.querySelector('input[type="text"]');
             if(input) {
                 input.focus();
@@ -427,74 +391,33 @@
             }
         }
 
-        // --- SETTINGS LOGIC ---
-        function openSettings() { document.getElementById('settings-modal').classList.remove('hidden'); }
-        function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
-
-        async function loadSheetData() {
-            const id = document.getElementById('sheet-id-input').value.trim();
-            const btn = document.getElementById('btn-load');
-            const err = document.getElementById('load-error');
-
-            if (!id) return;
+        // Core Fetch Logic
+        async function fetchFromGoogleSheet(id) {
+            const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Gagal. Pastikan Sheet Publik.");
             
-            btn.textContent = '...';
-            btn.disabled = true;
-            err.classList.add('hidden');
+            const text = await response.text();
+            const rows = parseCSV(text);
 
-            try {
-                const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`;
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("Gagal. Pastikan Sheet Publik.");
-                
-                const text = await response.text();
-                const rows = parseCSV(text);
+            const loadedTeachers = rows.slice(1).map((row, index) => ({
+                id: `t-${index}`,
+                name: row[0] || "",
+                subject: row[1] || "Mapel Umum",
+                linkInput: row[2] || "#",
+                linkCek: row[3] || "#",
+                linkJurnalGuru: row[4] || "#",
+                type: 'teacher'
+            })).filter(t => t.name !== "" && t.name.toLowerCase() !== "nama guru");
 
-                // Parse Teachers (Cols A-E)
-                const loadedTeachers = rows.slice(1).map((row, index) => ({
-                    id: `t-${index}`,
-                    name: row[0] || "",
-                    subject: row[1] || "Mapel Umum",
-                    linkInput: row[2] || "#",
-                    linkCek: row[3] || "#",
-                    linkJurnalGuru: row[4] || "#",
-                    type: 'teacher'
-                })).filter(t => t.name !== "" && t.name.toLowerCase() !== "nama guru");
+            const loadedClasses = rows.slice(1).map((row, index) => ({
+                id: `c-${index}`,
+                name: row[6] || "",
+                linkJurnal: row[7] || "#",
+                type: 'class'
+            })).filter(c => c.name !== "" && c.name.toLowerCase() !== "nama kelas");
 
-                // Parse Classes (Cols G-H)
-                const loadedClasses = rows.slice(1).map((row, index) => ({
-                    id: `c-${index}`,
-                    name: row[6] || "",
-                    linkJurnal: row[7] || "#",
-                    type: 'class'
-                })).filter(c => c.name !== "" && c.name.toLowerCase() !== "nama kelas");
-
-                state.teachers = loadedTeachers;
-                state.classes = loadedClasses;
-                state.isUsingDemo = false;
-                closeSettings();
-                
-                // Reset to home to show update
-                state.view = 'home';
-                render();
-
-            } catch (e) {
-                console.error(e);
-                err.textContent = "Gagal memuat. Periksa ID Sheet & Izin Akses.";
-                err.classList.remove('hidden');
-            } finally {
-                btn.textContent = 'Muat';
-                btn.disabled = false;
-            }
-        }
-
-        function useDemoData() {
-            state.teachers = [...DEMO_TEACHERS];
-            state.classes = [...DEMO_CLASSES];
-            state.isUsingDemo = true;
-            closeSettings();
-            state.view = 'home';
-            render();
+            return { teachers: loadedTeachers, classes: loadedClasses };
         }
 
         function parseCSV(text) {
