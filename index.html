@@ -32,18 +32,13 @@
     <div class="flex h-screen relative">
         
         <!-- SIDEBAR (Desktop & Mobile Drawer) -->
-        <!-- UBAH: w-64 menjadi w-80 agar sidebar lebih lebar -->
         <aside id="sidebar" class="bg-blue-900 text-white w-80 flex-shrink-0 flex flex-col transition-transform duration-300 absolute inset-y-0 left-0 z-50 md:relative md:translate-x-0 -translate-x-full shadow-xl">
             <!-- Brand -->
-            <!-- UBAH: Padding p-4 jadi p-6, gap-3 jadi gap-4 untuk layout lebih lega -->
             <div class="p-6 border-b border-blue-800 flex items-center gap-4">
-                <!-- UBAH: Padding p-1.5 jadi p-2 -->
                 <div class="bg-white p-2 rounded-lg text-blue-900">
-                    <!-- UBAH: Ukuran icon 24 jadi 28 -->
                     <i data-lucide="school" width="28"></i>
                 </div>
                 <div>
-                    <!-- UBAH: text-sm jadi text-lg dan tambah tracking-wide -->
                     <h1 class="font-bold text-lg leading-tight tracking-wide">SMP NEGERI 4<br>MAJENANG</h1>
                 </div>
                 <!-- Close Button (Mobile Only) -->
@@ -76,7 +71,7 @@
                     Lihat Jurnal Guru
                 </button>
 
-                <!-- 3. Edit Jurnal Guru (BARU) -->
+                <!-- 3. Edit Jurnal Guru -->
                 <button onclick="handleMenuClick('editJurnalGuru')" id="btn-editJurnalGuru" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-red-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="file-pen-line" width="18" class="group-hover:text-white"></i>
                     Edit Jurnal Guru
@@ -97,7 +92,7 @@
                     Lihat Jurnal Kelas
                 </button>
 
-                <!-- 6. Edit Jurnal Kelas (BARU) -->
+                <!-- 6. Edit Jurnal Kelas -->
                 <button onclick="handleMenuClick('editJurnalKelas')" id="btn-editJurnalKelas" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-fuchsia-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="pencil-ruler" width="18" class="group-hover:text-white"></i>
                     Edit Jurnal Kelas
@@ -112,7 +107,7 @@
                     Presensi Kelas
                 </button>
 
-                <!-- 8. Input Nilai -->
+                <!-- 8. Input Nilai (DIRECT LINK) -->
                 <button onclick="handleMenuClick('input')" id="btn-input" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-green-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="file-input" width="18" class="group-hover:text-white"></i>
                     Input Nilai
@@ -131,7 +126,7 @@
                     <span>&copy; <span id="year"></span> SMPN 4 Majenang</span>
                     <button onclick="window.location.reload()" title="Refresh Data" class="hover:text-white"><i data-lucide="refresh-cw" width="14"></i></button>
                 </div>
-                <p class="opacity-60">Versi 2.5 (9 Menu)</p>
+                <p class="opacity-60">Versi 2.6 (Fix Judul & Input Nilai)</p>
             </div>
         </aside>
 
@@ -343,7 +338,7 @@
                                     <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-green-100 group-hover:text-green-700">Nilai</span>
                                 </div>
                                 <span class="font-bold text-sm block">Input Nilai</span>
-                                <span class="text-xs text-gray-400">Form input nilai</span>
+                                <span class="text-xs text-gray-400">Form input nilai (1 Link)</span>
                             </button>
 
                              <button onclick="handleMenuClick('check')" class="p-4 border rounded-xl hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-all text-left group">
@@ -376,19 +371,21 @@
                 (item.subject && item.subject.toLowerCase().includes(state.searchTerm.toLowerCase()))
             );
 
+            // LOGIKA JUDUL DIPERBAIKI (MENGGUNAKAN ELSE IF AGAR TIDAK TERTUMPUK)
             let title = "";
             let color = "gray";
-            if(state.actionType === 'jurnalGuru') { title = "Isi Jurnal Guru"; color = "orange"; }
-            if(state.actionType === 'lihatJurnalGuru') { title = "Lihat Jurnal Guru"; color = "pink"; }
-            if(state.actionType === 'editJurnalGuru') { title = "Edit Jurnal Guru"; color = "red"; }
-            
-            if(state.actionType === 'jurnalKelas') { title = "Isi Jurnal Kelas"; color = "purple"; }
-            if(state.actionType === 'lihatJurnalKelas') { title = "Lihat Jurnal Kelas"; color = "indigo"; }
-            if(state.actionType === 'editJurnalKelas') { title = "Edit Jurnal Kelas"; color = "fuchsia"; }
 
-            if(state.actionType === 'checkPresensi') { title = "Presensi Kelas"; color = "teal"; }
-            if(state.actionType === 'input') { title = "Input Nilai"; color = "green"; }
-            if(state.actionType === 'check') { title = "Cek Nilai"; color = "blue"; }
+            if(state.actionType === 'jurnalGuru') { title = "Isi Jurnal Guru"; color = "orange"; }
+            else if(state.actionType === 'lihatJurnalGuru') { title = "Lihat Jurnal Guru"; color = "pink"; }
+            else if(state.actionType === 'editJurnalGuru') { title = "Edit Jurnal Guru"; color = "red"; }
+            
+            else if(state.actionType === 'jurnalKelas') { title = "Isi Jurnal Kelas"; color = "purple"; }
+            else if(state.actionType === 'lihatJurnalKelas') { title = "Lihat Jurnal Kelas"; color = "indigo"; }
+            else if(state.actionType === 'editJurnalKelas') { title = "Edit Jurnal Kelas"; color = "fuchsia"; }
+
+            else if(state.actionType === 'checkPresensi') { title = "Presensi Kelas"; color = "teal"; }
+            else if(state.actionType === 'check') { title = "Cek Nilai"; color = "blue"; }
+            // Input tidak ada di sini karena langsung view action
 
             let listHtml = '';
             if (filtered.length > 0) {
@@ -492,11 +489,11 @@
                     <!-- Toolbar Action -->
                     <div class="border-b px-4 py-3 flex items-center justify-between bg-gray-50">
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <button onclick="handleBackToList()" class="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors" title="Kembali ke Daftar">
+                            <button onclick="handleBackToList()" class="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors" title="Kembali">
                                 <i data-lucide="arrow-left" width="20"></i>
                             </button>
                             <div class="border-l border-gray-300 pl-3">
-                                <h3 class="font-bold text-gray-800 text-sm md:text-base truncate max-w-[200px]">${item.name}</h3>
+                                <h3 class="font-bold text-gray-800 text-sm md:text-base truncate max-w-[300px]">${item.name}</h3>
                             </div>
                         </div>
                         
@@ -540,6 +537,18 @@
             if (type === 'dashboard') {
                 state.view = 'dashboard';
                 state.actionType = null;
+            } else if (type === 'input') {
+                // LOGIKA KHUSUS: Input Nilai Langsung 1 Link
+                // Mengambil link dari data guru pertama (baris pertama sheet)
+                // Asumsi: Admin menaruh link yang sama untuk semua guru, atau link global di baris 1
+                const globalLink = state.teachers.length > 0 ? state.teachers[0].linkInput : "#";
+                
+                state.actionType = 'input';
+                state.selectedItem = {
+                    name: "Form Input Nilai (Semua Guru)",
+                    linkInput: globalLink
+                };
+                state.view = 'action';
             } else {
                 state.actionType = type;
                 state.view = 'list';
@@ -554,8 +563,14 @@
         }
 
         function handleBackToList() {
-            state.view = 'list';
-            state.selectedItem = null;
+            // Jika modenya Input Nilai (yang langsung action), tombol kembali harus ke Dashboard
+            if(state.actionType === 'input') {
+                state.view = 'dashboard';
+                state.actionType = null;
+            } else {
+                state.view = 'list';
+                state.selectedItem = null;
+            }
             render();
         }
 
