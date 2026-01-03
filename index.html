@@ -16,13 +16,9 @@
 
     <style>
         body { font-family: 'Inter', sans-serif; }
-        
-        /* Custom Scrollbar for Sidebar */
         .sidebar-scroll::-webkit-scrollbar { width: 5px; }
         .sidebar-scroll::-webkit-scrollbar-track { background: #1e3a8a; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 5px; }
-
-        /* Animation */
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -31,9 +27,8 @@
 
     <div class="flex h-screen relative">
         
-        <!-- SIDEBAR (Desktop & Mobile Drawer) -->
+        <!-- SIDEBAR -->
         <aside id="sidebar" class="bg-blue-900 text-white w-80 flex-shrink-0 flex flex-col transition-transform duration-300 absolute inset-y-0 left-0 z-50 md:relative md:translate-x-0 -translate-x-full shadow-xl">
-            <!-- Brand -->
             <div class="p-6 border-b border-blue-800 flex items-center gap-4">
                 <div class="bg-white p-2 rounded-lg text-blue-900">
                     <i data-lucide="school" width="28"></i>
@@ -41,13 +36,11 @@
                 <div>
                     <h1 class="font-bold text-lg leading-tight tracking-wide">SMP NEGERI 4<br>MAJENANG</h1>
                 </div>
-                <!-- Close Button (Mobile Only) -->
                 <button onclick="toggleSidebar()" class="md:hidden ml-auto text-blue-300 hover:text-white">
                     <i data-lucide="x" width="20"></i>
                 </button>
             </div>
 
-            <!-- Menu Items -->
             <nav class="flex-1 overflow-y-auto sidebar-scroll py-4 space-y-1 px-3">
                 <p class="px-3 text-xs font-semibold text-blue-300 uppercase tracking-wider mb-2">Menu Utama</p>
                 
@@ -59,19 +52,16 @@
                 <div class="my-4 border-t border-blue-800"></div>
                 <p class="px-3 text-xs font-semibold text-blue-300 uppercase tracking-wider mb-2">Jurnal Guru</p>
 
-                <!-- 1. Jurnal Guru -->
                 <button onclick="handleMenuClick('jurnalGuru')" id="btn-jurnalGuru" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-orange-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="clipboard-list" width="18" class="group-hover:text-white"></i>
                     Isi Jurnal Guru
                 </button>
 
-                <!-- 2. Lihat Jurnal Guru -->
                 <button onclick="handleMenuClick('lihatJurnalGuru')" id="btn-lihatJurnalGuru" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-pink-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="eye" width="18" class="group-hover:text-white"></i>
                     Lihat Jurnal Guru
                 </button>
 
-                <!-- 3. Edit Jurnal Guru -->
                 <button onclick="handleMenuClick('editJurnalGuru')" id="btn-editJurnalGuru" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-red-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="file-pen-line" width="18" class="group-hover:text-white"></i>
                     Edit Jurnal Guru
@@ -80,19 +70,16 @@
                 <div class="my-2 border-t border-blue-800/50"></div>
                 <p class="px-3 text-xs font-semibold text-blue-300 uppercase tracking-wider mb-2">Jurnal Kelas</p>
 
-                <!-- 4. Jurnal Kelas -->
                 <button onclick="handleMenuClick('jurnalKelas')" id="btn-jurnalKelas" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-purple-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="book-marked" width="18" class="group-hover:text-white"></i>
                     Isi Jurnal Kelas
                 </button>
 
-                <!-- 5. Lihat Jurnal Kelas -->
                 <button onclick="handleMenuClick('lihatJurnalKelas')" id="btn-lihatJurnalKelas" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-indigo-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="file-search" width="18" class="group-hover:text-white"></i>
                     Lihat Jurnal Kelas
                 </button>
 
-                <!-- 6. Edit Jurnal Kelas -->
                 <button onclick="handleMenuClick('editJurnalKelas')" id="btn-editJurnalKelas" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-fuchsia-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="pencil-ruler" width="18" class="group-hover:text-white"></i>
                     Edit Jurnal Kelas
@@ -101,41 +88,35 @@
                 <div class="my-2 border-t border-blue-800/50"></div>
                 <p class="px-3 text-xs font-semibold text-blue-300 uppercase tracking-wider mb-2">Lainnya</p>
 
-                <!-- 7. Presensi Kelas -->
                 <button onclick="handleMenuClick('checkPresensi')" id="btn-checkPresensi" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-teal-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="user-check" width="18" class="group-hover:text-white"></i>
                     Presensi Kelas
                 </button>
 
-                <!-- 8. Input Nilai (DIRECT LINK) -->
                 <button onclick="handleMenuClick('input')" id="btn-input" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-green-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="file-input" width="18" class="group-hover:text-white"></i>
                     Input Nilai
                 </button>
 
-                <!-- 9. Cek Nilai -->
                 <button onclick="handleMenuClick('check')" id="btn-check" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-blue-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="table" width="18" class="group-hover:text-white"></i>
                     Cek Nilai
                 </button>
             </nav>
 
-            <!-- Footer Sidebar -->
             <div class="p-4 border-t border-blue-800 text-xs text-blue-300">
                 <div class="flex items-center justify-between mb-2">
                     <span>&copy; <span id="year"></span> SMPN 4 Majenang</span>
                     <button onclick="window.location.reload()" title="Refresh Data" class="hover:text-white"><i data-lucide="refresh-cw" width="14"></i></button>
                 </div>
-                <p class="opacity-60">Versi 2.6 (Fix Judul & Input Nilai)</p>
+                <p class="opacity-60">Versi 2.8 (Fixed Logic)</p>
             </div>
         </aside>
 
-        <!-- OVERLAY (Mobile) -->
         <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden glass"></div>
 
         <!-- MAIN CONTENT -->
         <div class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50">
-            <!-- Mobile Header -->
             <header class="bg-white border-b px-4 py-3 flex items-center justify-between md:hidden shrink-0 shadow-sm z-30">
                 <div class="flex items-center gap-3">
                     <button onclick="toggleSidebar()" class="text-gray-600 hover:text-blue-900">
@@ -145,9 +126,7 @@
                 </div>
             </header>
 
-            <!-- Dynamic Content Area -->
             <main id="main-content" class="flex-1 overflow-y-auto p-4 md:p-8 relative">
-                <!-- Content injected via JS -->
                 <div class="flex flex-col items-center justify-center h-full text-gray-400">
                     <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-900 mb-4"></div>
                     <p>Memuat data sistem...</p>
@@ -158,11 +137,7 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // =================================================================
-        // CONFIG
-        // =================================================================
         const GOOGLE_SHEET_ID = "1TAq2LiT663wxPHwbWBnRN1KbkjBnGMwcU5PgsZWiQpg"; 
-        // =================================================================
 
         let state = {
             view: 'dashboard', 
@@ -175,7 +150,21 @@
             loading: true
         };
 
-        // --- INIT ---
+        // KONFIGURASI MENU (Agar Judul Konsisten)
+        const MENU_CONFIG = {
+            'jurnalGuru': { title: "Isi Jurnal Guru", color: "orange", key: "linkJurnalGuru", type: 'teacher' },
+            'lihatJurnalGuru': { title: "Lihat Jurnal Guru", color: "pink", key: "linkLihatJurnalGuru", type: 'teacher' },
+            'editJurnalGuru': { title: "Edit Jurnal Guru", color: "red", key: "linkEditJurnalGuru", type: 'teacher' },
+            
+            'jurnalKelas': { title: "Isi Jurnal Kelas", color: "purple", key: "linkJurnal", type: 'class' },
+            'lihatJurnalKelas': { title: "Lihat Jurnal Kelas", color: "indigo", key: "linkLihatJurnalKelas", type: 'class' },
+            'editJurnalKelas': { title: "Edit Jurnal Kelas", color: "fuchsia", key: "linkEditJurnalKelas", type: 'class' },
+            
+            'checkPresensi': { title: "Presensi Kelas", color: "teal", key: "linkPresensi", type: 'attendance' },
+            'input': { title: "Input Nilai", color: "green", key: "linkInput", type: 'teacher' },
+            'check': { title: "Cek Nilai", color: "blue", key: "linkCek", type: 'teacher' }
+        };
+
         document.getElementById('year').textContent = new Date().getFullYear();
         initApp();
 
@@ -197,7 +186,6 @@
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
             const isClosed = sidebar.classList.contains('-translate-x-full');
-
             if (isClosed) {
                 sidebar.classList.remove('-translate-x-full');
                 overlay.classList.remove('hidden');
@@ -207,328 +195,6 @@
             }
         }
 
-        function updateActiveMenu() {
-            // Reset classes
-            const buttons = document.querySelectorAll('nav button');
-            buttons.forEach(btn => {
-                if(btn.id === 'btn-dashboard') btn.classList.remove('bg-blue-800', 'text-white');
-                else {
-                    btn.classList.remove('bg-orange-600', 'bg-pink-600', 'bg-red-600', 'bg-purple-600', 'bg-indigo-600', 'bg-fuchsia-600', 'bg-teal-600', 'bg-green-600', 'bg-blue-600', 'text-white', 'shadow-md');
-                    btn.classList.add('text-blue-100');
-                }
-            });
-
-            // Set Active
-            if (state.view === 'dashboard') {
-                document.getElementById('btn-dashboard').classList.add('bg-blue-800', 'text-white');
-            } else {
-                const btnId = 'btn-' + state.actionType;
-                const btn = document.getElementById(btnId);
-                if (btn) {
-                    btn.classList.remove('text-blue-100');
-                    btn.classList.add('text-white', 'shadow-md');
-                    
-                    if(state.actionType === 'jurnalGuru') btn.classList.add('bg-orange-600');
-                    if(state.actionType === 'lihatJurnalGuru') btn.classList.add('bg-pink-600');
-                    if(state.actionType === 'editJurnalGuru') btn.classList.add('bg-red-600');
-                    if(state.actionType === 'jurnalKelas') btn.classList.add('bg-purple-600');
-                    if(state.actionType === 'lihatJurnalKelas') btn.classList.add('bg-indigo-600');
-                    if(state.actionType === 'editJurnalKelas') btn.classList.add('bg-fuchsia-600');
-                    if(state.actionType === 'checkPresensi') btn.classList.add('bg-teal-600');
-                    if(state.actionType === 'input') btn.classList.add('bg-green-600');
-                    if(state.actionType === 'check') btn.classList.add('bg-blue-600');
-                }
-            }
-        }
-
-        function render() {
-            const main = document.getElementById('main-content');
-            updateActiveMenu();
-            setTimeout(() => lucide.createIcons(), 50);
-
-            if (state.view === 'dashboard') {
-                main.innerHTML = renderDashboard();
-            } else if (state.view === 'list') {
-                main.innerHTML = renderList();
-            } else if (state.view === 'action') {
-                main.innerHTML = renderAction();
-            }
-        }
-
-        function renderDashboard() {
-            return `
-                <div class="max-w-6xl mx-auto fade-in">
-                    <div class="mb-8">
-                        <h2 class="text-2xl font-bold text-gray-800">Selamat Datang 👋</h2>
-                        <p class="text-gray-500">Sistem Informasi Pembelajaran dan Asesmen SMP Negeri 4 Majenang</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="font-bold text-gray-800 mb-4">Akses Cepat</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- GROUP JURNAL GURU -->
-                            <button onclick="handleMenuClick('jurnalGuru')" class="p-4 border rounded-xl hover:bg-orange-50 hover:border-orange-200 hover:text-orange-700 transition-all text-left group">
-                                <div class="flex justify-between items-start mb-2">
-                                    <i data-lucide="clipboard-list" width="24" class="text-gray-400 group-hover:text-orange-600"></i>
-                                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-orange-100 group-hover:text-orange-700">Isi</span>
-                                </div>
-                                <span class="font-bold text-sm block">Isi Jurnal Guru</span>
-                                <span class="text-xs text-gray-400">Agenda harian</span>
-                            </button>
-
-                            <button onclick="handleMenuClick('lihatJurnalGuru')" class="p-4 border rounded-xl hover:bg-pink-50 hover:border-pink-200 hover:text-pink-700 transition-all text-left group">
-                                <div class="flex justify-between items-start mb-2">
-                                    <i data-lucide="eye" width="24" class="text-gray-400 group-hover:text-pink-600"></i>
-                                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-pink-100 group-hover:text-pink-700">Lihat</span>
-                                </div>
-                                <span class="font-bold text-sm block">Lihat Jurnal Guru</span>
-                                <span class="text-xs text-gray-400">Monitoring jurnal</span>
-                            </button>
-
-                            <button onclick="handleMenuClick('editJurnalGuru')" class="p-4 border rounded-xl hover:bg-red-50 hover:border-red-200 hover:text-red-700 transition-all text-left group">
-                                <div class="flex justify-between items-start mb-2">
-                                    <i data-lucide="file-pen-line" width="24" class="text-gray-400 group-hover:text-red-600"></i>
-                                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-red-100 group-hover:text-red-700">Edit</span>
-                                </div>
-                                <span class="font-bold text-sm block">Edit Jurnal Guru</span>
-                                <span class="text-xs text-gray-400">Koreksi data</span>
-                            </button>
-
-                            <!-- GROUP JURNAL KELAS -->
-                            <button onclick="handleMenuClick('jurnalKelas')" class="p-4 border rounded-xl hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700 transition-all text-left group">
-                                <div class="flex justify-between items-start mb-2">
-                                    <i data-lucide="book-marked" width="24" class="text-gray-400 group-hover:text-purple-600"></i>
-                                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-purple-100 group-hover:text-purple-700">Isi</span>
-                                </div>
-                                <span class="font-bold text-sm block">Isi Jurnal Kelas</span>
-                                <span class="text-xs text-gray-400">Isi Agenda Pembelajaran</span>
-                            </button>
-
-                            <button onclick="handleMenuClick('lihatJurnalKelas')" class="p-4 border rounded-xl hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700 transition-all text-left group">
-                                <div class="flex justify-between items-start mb-2">
-                                    <i data-lucide="file-search" width="24" class="text-gray-400 group-hover:text-indigo-600"></i>
-                                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-indigo-100 group-hover:text-indigo-700">Lihat</span>
-                                </div>
-                                <span class="font-bold text-sm block">Lihat Jurnal Kelas</span>
-                                <span class="text-xs text-gray-400">Monitoring kelas</span>
-                            </button>
-
-                             <button onclick="handleMenuClick('editJurnalKelas')" class="p-4 border rounded-xl hover:bg-fuchsia-50 hover:border-fuchsia-200 hover:text-fuchsia-700 transition-all text-left group">
-                                <div class="flex justify-between items-start mb-2">
-                                    <i data-lucide="pencil-ruler" width="24" class="text-gray-400 group-hover:text-fuchsia-600"></i>
-                                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-fuchsia-100 group-hover:text-fuchsia-700">Edit</span>
-                                </div>
-                                <span class="font-bold text-sm block">Edit Jurnal Kelas</span>
-                                <span class="text-xs text-gray-400">Koreksi agenda</span>
-                            </button>
-
-                            <!-- LAINNYA -->
-                            <button onclick="handleMenuClick('checkPresensi')" class="p-4 border rounded-xl hover:bg-teal-50 hover:border-teal-200 hover:text-teal-700 transition-all text-left group">
-                                <div class="flex justify-between items-start mb-2">
-                                    <i data-lucide="user-check" width="24" class="text-gray-400 group-hover:text-teal-600"></i>
-                                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-teal-100 group-hover:text-teal-700">Presensi</span>
-                                </div>
-                                <span class="font-bold text-sm block">Presensi Kelas</span>
-                                <span class="text-xs text-gray-400">Link akses wali kelas</span>
-                            </button>
-
-                             <button onclick="handleMenuClick('input')" class="p-4 border rounded-xl hover:bg-green-50 hover:border-green-200 hover:text-green-700 transition-all text-left group">
-                                <div class="flex justify-between items-start mb-2">
-                                    <i data-lucide="file-input" width="24" class="text-gray-400 group-hover:text-green-600"></i>
-                                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-green-100 group-hover:text-green-700">Nilai</span>
-                                </div>
-                                <span class="font-bold text-sm block">Input Nilai</span>
-                                <span class="text-xs text-gray-400">Form input nilai (1 Link)</span>
-                            </button>
-
-                             <button onclick="handleMenuClick('check')" class="p-4 border rounded-xl hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-all text-left group">
-                                <div class="flex justify-between items-start mb-2">
-                                    <i data-lucide="table" width="24" class="text-gray-400 group-hover:text-blue-600"></i>
-                                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-blue-100 group-hover:text-blue-700">Siswa</span>
-                                </div>
-                                <span class="font-bold text-sm block">Cek Nilai</span>
-                                <span class="text-xs text-gray-400">Lihat daftar nilai harian</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderList() {
-            let dataSource = [];
-            let isTeacher = false;
-
-            if (state.actionType.toLowerCase().includes('jurnalkelas')) dataSource = state.classes;
-            else if (state.actionType === 'checkPresensi') dataSource = state.attendanceClasses;
-            else {
-                dataSource = state.teachers;
-                isTeacher = true;
-            }
-            
-            const filtered = dataSource.filter(item => 
-                item.name.toLowerCase().includes(state.searchTerm.toLowerCase()) || 
-                (item.subject && item.subject.toLowerCase().includes(state.searchTerm.toLowerCase()))
-            );
-
-            // LOGIKA JUDUL DIPERBAIKI (MENGGUNAKAN ELSE IF AGAR TIDAK TERTUMPUK)
-            let title = "";
-            let color = "gray";
-
-            if(state.actionType === 'jurnalGuru') { title = "Isi Jurnal Guru"; color = "orange"; }
-            else if(state.actionType === 'lihatJurnalGuru') { title = "Lihat Jurnal Guru"; color = "pink"; }
-            else if(state.actionType === 'editJurnalGuru') { title = "Edit Jurnal Guru"; color = "red"; }
-            
-            else if(state.actionType === 'jurnalKelas') { title = "Isi Jurnal Kelas"; color = "purple"; }
-            else if(state.actionType === 'lihatJurnalKelas') { title = "Lihat Jurnal Kelas"; color = "indigo"; }
-            else if(state.actionType === 'editJurnalKelas') { title = "Edit Jurnal Kelas"; color = "fuchsia"; }
-
-            else if(state.actionType === 'checkPresensi') { title = "Presensi Kelas"; color = "teal"; }
-            else if(state.actionType === 'check') { title = "Cek Nilai"; color = "blue"; }
-            // Input tidak ada di sini karena langsung view action
-
-            let listHtml = '';
-            if (filtered.length > 0) {
-                listHtml = filtered.map(item => {
-                    let subHtml = '';
-                    
-                    if (state.actionType.includes('jurnalKelas')) {
-                        let badgeText = "Link";
-                        if(state.actionType === 'lihatJurnalKelas') badgeText = "Rekap";
-                        if(state.actionType === 'editJurnalKelas') badgeText = "Edit";
-                        subHtml = `<span class="text-xs bg-${color}-50 text-${color}-700 px-2 py-1 rounded border border-${color}-100">${badgeText} Jurnal</span>`;
-                    } else if (state.actionType === 'checkPresensi') {
-                        subHtml = `<span class="text-xs bg-${color}-50 text-${color}-700 px-2 py-1 rounded border border-${color}-100">Rekap Presensi</span>`;
-                    } else {
-                        // Data Guru
-                        const subjects = item.subject.split(',').map(s => s.trim()).filter(s => s);
-                        subHtml = subjects.map(s => 
-                            `<span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 truncate max-w-[150px] inline-block">${s}</span>`
-                        ).join('');
-                    }
-
-                    return `
-                    <button onclick='handleItemClick(${JSON.stringify(item).replace(/'/g, "&#39;")})'
-                        class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-${color}-300 transition-all text-left group">
-                        
-                        <div class="flex items-center gap-3 flex-1 min-w-0">
-                            <div class="h-10 w-10 rounded-full bg-${color}-50 text-${color}-600 flex items-center justify-center shrink-0">
-                                <i data-lucide="${isTeacher ? 'user' : (state.actionType === 'checkPresensi' ? 'calendar-check' : 'users')}" width="20"></i>
-                            </div>
-                            <div class="min-w-0">
-                                <h4 class="font-bold text-gray-900 truncate">${item.name}</h4>
-                                <div class="flex flex-wrap gap-1 mt-1">
-                                    ${subHtml}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="hidden sm:block">
-                            <i data-lucide="chevron-right" width="20" class="text-gray-300 group-hover:text-${color}-500"></i>
-                        </div>
-                    </button>
-                    `;
-                }).join('');
-            } else {
-                listHtml = `
-                    <div class="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200 col-span-full">
-                        <i data-lucide="search" width="40" class="mx-auto mb-2 opacity-30"></i>
-                        <p>Data tidak ditemukan.</p>
-                    </div>
-                `;
-            }
-
-            return `
-                <div class="max-w-5xl mx-auto fade-in h-full flex flex-col">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800">${title}</h2>
-                            <p class="text-gray-500 text-sm">Pilih data dari daftar di bawah ini.</p>
-                        </div>
-                    </div>
-
-                    <div class="relative mb-6">
-                        <input
-                            type="text"
-                            oninput="handleSearch(this.value)"
-                            value="${state.searchTerm}"
-                            placeholder="${isTeacher ? 'Cari nama guru atau mapel...' : 'Cari nama kelas...'}"
-                            class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                        >
-                        <i data-lucide="search" width="20" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 pb-8">
-                        ${listHtml}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderAction() {
-            const item = state.selectedItem;
-            let link = "#";
-            
-            if (state.actionType === 'input') { link = item.linkInput; }
-            else if (state.actionType === 'check') { link = item.linkCek; }
-            
-            else if (state.actionType === 'jurnalGuru') { link = item.linkJurnalGuru; }
-            else if (state.actionType === 'lihatJurnalGuru') { link = item.linkLihatJurnalGuru; }
-            else if (state.actionType === 'editJurnalGuru') { link = item.linkEditJurnalGuru; }
-
-            else if (state.actionType === 'jurnalKelas') { link = item.linkJurnal; }
-            else if (state.actionType === 'lihatJurnalKelas') { link = item.linkLihatJurnalKelas; }
-            else if (state.actionType === 'editJurnalKelas') { link = item.linkEditJurnalKelas; }
-            
-            else if (state.actionType === 'checkPresensi') { link = item.linkPresensi; }
-
-            const isInvalid = !link || link === '#' || link.length < 5;
-
-            return `
-                <div class="flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in">
-                    <!-- Toolbar Action -->
-                    <div class="border-b px-4 py-3 flex items-center justify-between bg-gray-50">
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <button onclick="handleBackToList()" class="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors" title="Kembali">
-                                <i data-lucide="arrow-left" width="20"></i>
-                            </button>
-                            <div class="border-l border-gray-300 pl-3">
-                                <h3 class="font-bold text-gray-800 text-sm md:text-base truncate max-w-[300px]">${item.name}</h3>
-                            </div>
-                        </div>
-                        
-                        ${!isInvalid ? `
-                        <a href="${link}" target="_blank" class="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 transition-colors">
-                            <span class="hidden sm:inline">Buka Tab Baru</span>
-                            <i data-lucide="external-link" width="14"></i>
-                        </a>` : ''}
-                    </div>
-
-                    <!-- Content -->
-                    <div class="flex-1 relative bg-gray-100">
-                        ${isInvalid ? `
-                            <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                                <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm">
-                                    <div class="mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-red-100 text-red-600">
-                                        <i data-lucide="alert-circle" width="24"></i>
-                                    </div>
-                                    <h3 class="font-bold text-gray-800">Link Tidak Tersedia</h3>
-                                    <p class="text-sm text-gray-500 mt-1">Data link belum diatur di spreadsheet.</p>
-                                </div>
-                            </div>
-                        ` : `
-                            <div class="absolute top-0 left-0 w-full bg-yellow-50 px-3 py-1.5 text-[10px] text-yellow-800 flex justify-center gap-2 border-b border-yellow-100 z-10">
-                                <i data-lucide="info" width="12"></i>
-                                <span>Jika kosong, klik tombol <strong>"Buka Tab Baru"</strong> di pojok kanan.</span>
-                            </div>
-                            <iframe src="${link}" class="w-full h-full border-none pt-6" sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation"></iframe>
-                        `}
-                    </div>
-                </div>
-            `;
-        }
-
-        // --- NAVIGATION LOGIC ---
         function handleMenuClick(type) {
             document.getElementById('sidebar').classList.add('-translate-x-full');
             document.getElementById('overlay').classList.add('hidden');
@@ -538,16 +204,9 @@
                 state.view = 'dashboard';
                 state.actionType = null;
             } else if (type === 'input') {
-                // LOGIKA KHUSUS: Input Nilai Langsung 1 Link
-                // Mengambil link dari data guru pertama (baris pertama sheet)
-                // Asumsi: Admin menaruh link yang sama untuk semua guru, atau link global di baris 1
                 const globalLink = state.teachers.length > 0 ? state.teachers[0].linkInput : "#";
-                
                 state.actionType = 'input';
-                state.selectedItem = {
-                    name: "Form Input Nilai (Semua Guru)",
-                    linkInput: globalLink
-                };
+                state.selectedItem = { name: "Input Nilai (Semua)", linkInput: globalLink };
                 state.view = 'action';
             } else {
                 state.actionType = type;
@@ -563,7 +222,6 @@
         }
 
         function handleBackToList() {
-            // Jika modenya Input Nilai (yang langsung action), tombol kembali harus ke Dashboard
             if(state.actionType === 'input') {
                 state.view = 'dashboard';
                 state.actionType = null;
@@ -574,85 +232,218 @@
             render();
         }
 
-        function handleSearch(val) {
-            state.searchTerm = val;
-            render();
-            const input = document.querySelector('input[type="text"]');
-            if(input) {
-                input.focus();
-                input.setSelectionRange(input.value.length, input.value.length);
+        function render() {
+            // Update Sidebar Active State
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-blue-800', 'text-white', 'bg-orange-600', 'bg-pink-600', 'bg-red-600', 'bg-purple-600', 'bg-indigo-600', 'bg-fuchsia-600', 'bg-teal-600', 'bg-green-600', 'bg-blue-600', 'shadow-md');
+                btn.classList.add('text-blue-100');
+            });
+
+            if (state.view === 'dashboard') {
+                const dashBtn = document.getElementById('btn-dashboard');
+                if(dashBtn) dashBtn.classList.add('bg-blue-800', 'text-white');
+                document.getElementById('main-content').innerHTML = renderDashboard();
+            } else {
+                const btnId = 'btn-' + state.actionType;
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    const config = MENU_CONFIG[state.actionType];
+                    btn.classList.remove('text-blue-100');
+                    btn.classList.add('text-white', 'shadow-md', `bg-${config.color}-600`);
+                }
+                
+                if (state.view === 'list') {
+                    document.getElementById('main-content').innerHTML = renderList();
+                } else if (state.view === 'action') {
+                    document.getElementById('main-content').innerHTML = renderAction();
+                }
             }
+            setTimeout(() => lucide.createIcons(), 50);
         }
 
-        function renderError(msg) {
-            document.getElementById('main-content').innerHTML = `
-                <div class="flex flex-col items-center justify-center h-full p-8 text-center">
-                    <i data-lucide="alert-triangle" width="48" class="text-red-500 mb-4"></i>
-                    <h3 class="text-lg font-bold text-gray-800">Terjadi Kesalahan</h3>
-                    <p class="text-gray-500 text-sm mt-1">${msg}</p>
-                    <button onclick="window.location.reload()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">Muat Ulang</button>
+        function renderDashboard() {
+            return `
+                <div class="max-w-6xl mx-auto fade-in">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-gray-800">Selamat Datang 👋</h2>
+                        <p class="text-gray-500">Sistem Informasi Pembelajaran dan Asesmen SMP Negeri 4 Majenang</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="font-bold text-gray-800 mb-4">Akses Cepat</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${renderDashboardButton('jurnalGuru', 'Isi', 'orange', 'Jurnal Guru', 'Agenda harian')}
+                            ${renderDashboardButton('lihatJurnalGuru', 'Lihat', 'pink', 'Lihat Jurnal Guru', 'Monitoring')}
+                            ${renderDashboardButton('editJurnalGuru', 'Edit', 'red', 'Edit Jurnal Guru', 'Koreksi data')}
+                            
+                            ${renderDashboardButton('jurnalKelas', 'Isi', 'purple', 'Isi Jurnal Kelas', 'Agenda kelas')}
+                            ${renderDashboardButton('lihatJurnalKelas', 'Lihat', 'indigo', 'Lihat Jurnal Kelas', 'Monitoring')}
+                            ${renderDashboardButton('editJurnalKelas', 'Edit', 'fuchsia', 'Edit Jurnal Kelas', 'Koreksi agenda')}
+                            
+                            ${renderDashboardButton('checkPresensi', 'Presensi', 'teal', 'Presensi Kelas', 'Data kehadiran')}
+                            ${renderDashboardButton('input', 'Nilai', 'green', 'Input Nilai', 'Form input')}
+                            ${renderDashboardButton('check', 'Siswa', 'blue', 'Cek Nilai', 'Daftar nilai')}
+                        </div>
+                    </div>
                 </div>
             `;
-            lucide.createIcons();
         }
 
-        // --- DATA FETCHING ---
+        function renderDashboardButton(id, badge, color, title, desc) {
+            // Mapping icon based on id
+            let icon = 'circle';
+            if(id.includes('jurnalGuru')) icon = 'clipboard-list';
+            if(id.includes('lihat')) icon = id.includes('Kelas') ? 'file-search' : 'eye';
+            if(id.includes('edit')) icon = id.includes('Kelas') ? 'pencil-ruler' : 'file-pen-line';
+            if(id.includes('jurnalKelas') && !id.includes('lihat') && !id.includes('edit')) icon = 'book-marked';
+            if(id === 'checkPresensi') icon = 'user-check';
+            if(id === 'input') icon = 'file-input';
+            if(id === 'check') icon = 'table';
+
+            return `
+            <button onclick="handleMenuClick('${id}')" class="p-4 border rounded-xl hover:bg-${color}-50 hover:border-${color}-200 hover:text-${color}-700 transition-all text-left group">
+                <div class="flex justify-between items-start mb-2">
+                    <i data-lucide="${icon}" width="24" class="text-gray-400 group-hover:text-${color}-600"></i>
+                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-${color}-100 group-hover:text-${color}-700">${badge}</span>
+                </div>
+                <span class="font-bold text-sm block">${title}</span>
+                <span class="text-xs text-gray-400">${desc}</span>
+            </button>`;
+        }
+
+        function renderList() {
+            const config = MENU_CONFIG[state.actionType];
+            let dataSource = [];
+            let isTeacher = false;
+
+            // Select Data Source based on config type
+            if(config.type === 'class') dataSource = state.classes;
+            else if(config.type === 'attendance') dataSource = state.attendanceClasses;
+            else { dataSource = state.teachers; isTeacher = true; }
+
+            const filtered = dataSource.filter(item => 
+                item.name.toLowerCase().includes(state.searchTerm.toLowerCase()) || 
+                (item.subject && item.subject.toLowerCase().includes(state.searchTerm.toLowerCase()))
+            );
+
+            let listHtml = filtered.length > 0 ? filtered.map(item => {
+                let subHtml = '';
+                // Dynamic Badge content based on action type
+                if(config.type === 'class' || config.type === 'attendance') {
+                    let badgeLabel = "Link";
+                    if(state.actionType.includes('lihat')) badgeLabel = "Rekap";
+                    if(state.actionType.includes('edit')) badgeLabel = "Edit";
+                    subHtml = `<span class="text-xs bg-${config.color}-50 text-${config.color}-700 px-2 py-1 rounded border border-${config.color}-100">${badgeLabel}</span>`;
+                } else {
+                    // Teacher subjects
+                    const subjects = item.subject.split(',').map(s => s.trim()).filter(s => s);
+                    subHtml = subjects.map(s => 
+                        `<span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 truncate max-w-[150px] inline-block">${s}</span>`
+                    ).join('');
+                }
+
+                return `
+                <button onclick='handleItemClick(${JSON.stringify(item).replace(/'/g, "&#39;")})'
+                    class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-${config.color}-300 transition-all text-left group">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="h-10 w-10 rounded-full bg-${config.color}-50 text-${config.color}-600 flex items-center justify-center shrink-0">
+                            <i data-lucide="${isTeacher ? 'user' : 'users'}" width="20"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-gray-900 truncate">${item.name}</h4>
+                            <div class="flex flex-wrap gap-1 mt-1">${subHtml}</div>
+                        </div>
+                    </div>
+                    <div class="hidden sm:block"><i data-lucide="chevron-right" width="20" class="text-gray-300 group-hover:text-${config.color}-500"></i></div>
+                </button>`;
+            }).join('') : `<div class="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200 col-span-full"><p>Data tidak ditemukan.</p></div>`;
+
+            return `
+                <div class="max-w-5xl mx-auto fade-in h-full flex flex-col">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">${config.title}</h2>
+                            <p class="text-gray-500 text-sm">Pilih data dari daftar di bawah ini.</p>
+                        </div>
+                    </div>
+                    <div class="relative mb-6">
+                        <input type="text" oninput="state.searchTerm = this.value; render()" value="${state.searchTerm}" 
+                            placeholder="${isTeacher ? 'Cari nama guru...' : 'Cari nama kelas...'}"
+                            class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-${config.color}-500 outline-none transition-all">
+                        <i data-lucide="search" width="20" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 pb-8">${listHtml}</div>
+                </div>`;
+        }
+
+        function renderAction() {
+            const item = state.selectedItem;
+            const config = MENU_CONFIG[state.actionType];
+            
+            // Get link dynamically based on the key in config
+            let link = item[config.key] || "#";
+            const isInvalid = !link || link === '#' || link.length < 5;
+
+            return `
+                <div class="flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in">
+                    <div class="border-b px-4 py-3 flex items-center justify-between bg-gray-50">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <button onclick="handleBackToList()" class="p-1.5 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors" title="Kembali">
+                                <i data-lucide="arrow-left" width="20"></i>
+                            </button>
+                            <div class="border-l border-gray-300 pl-3">
+                                <div class="flex flex-col">
+                                    <h3 class="font-bold text-gray-800 text-sm md:text-base truncate max-w-[300px]">${item.name}</h3>
+                                    <span class="text-xs text-${config.color}-600 font-medium uppercase tracking-wide">${config.title}</span>
+                                </div>
+                            </div>
+                        </div>
+                        ${!isInvalid ? `<a href="${link}" target="_blank" class="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 transition-colors"><span class="hidden sm:inline">Buka Tab Baru</span><i data-lucide="external-link" width="14"></i></a>` : ''}
+                    </div>
+                    <div class="flex-1 relative bg-gray-100">
+                        ${isInvalid ? `<div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center"><div class="bg-white p-6 rounded-xl shadow-lg max-w-sm"><h3 class="font-bold text-gray-800">Link Tidak Tersedia</h3><p class="text-sm text-gray-500 mt-1">Data link belum diatur.</p></div></div>` : 
+                        `<div class="absolute top-0 left-0 w-full bg-yellow-50 px-3 py-1.5 text-[10px] text-yellow-800 flex justify-center gap-2 border-b border-yellow-100 z-10"><span>Jika kosong, klik tombol <strong>"Buka Tab Baru"</strong>.</span></div><iframe src="${link}" class="w-full h-full border-none pt-6"></iframe>`}
+                    </div>
+                </div>`;
+        }
+
         async function fetchFromGoogleSheet(id) {
             const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`;
             const response = await fetch(url);
-            if (!response.ok) throw new Error("Network error");
             const text = await response.text();
             const rows = parseCSV(text);
 
-            // Parsing Data Guru (Kolom A-G) (Index 0-6)
             const loadedTeachers = rows.slice(1).map((row, index) => ({
-                id: `t-${index}`,
-                name: row[0] || "",
-                subject: row[1] || "Mapel Umum",
-                linkInput: row[2] || "#",
-                linkCek: row[3] || "#",
-                linkJurnalGuru: row[4] || "#",
-                linkLihatJurnalGuru: row[5] || "#",
-                linkEditJurnalGuru: row[6] || "#", // New Col G
-                type: 'teacher'
+                id: `t-${index}`, name: row[0]||"", subject: row[1]||"", linkInput: row[2]||"#", linkCek: row[3]||"#", 
+                linkJurnalGuru: row[4]||"#", linkLihatJurnalGuru: row[5]||"#", linkEditJurnalGuru: row[6]||"#"
             })).filter(t => t.name !== "" && t.name.toLowerCase() !== "nama guru");
 
-            // Parsing Data Jurnal Kelas (Kolom I-L) (Index 8-11)
             const loadedClasses = rows.slice(1).map((row, index) => ({
-                id: `c-${index}`,
-                name: row[8] || "",
-                linkJurnal: row[9] || "#",
-                linkLihatJurnalKelas: row[10] || "#",
-                linkEditJurnalKelas: row[11] || "#", // New Col L
-                type: 'class'
+                id: `c-${index}`, name: row[8]||"", linkJurnal: row[9]||"#", linkLihatJurnalKelas: row[10]||"#", linkEditJurnalKelas: row[11]||"#"
             })).filter(c => c.name !== "" && c.name.toLowerCase() !== "nama kelas");
 
-            // Parsing Data Presensi (Kolom N-O) (Index 13-14)
             const loadedAttendance = rows.slice(1).map((row, index) => ({
-                id: `p-${index}`,
-                name: row[13] || "",
-                linkPresensi: row[14] || "#",
-                type: 'attendance'
+                id: `p-${index}`, name: row[13]||"", linkPresensi: row[14]||"#"
             })).filter(a => a.name !== "" && a.name.toLowerCase() !== "nama kelas");
 
             return { teachers: loadedTeachers, classes: loadedClasses, attendanceClasses: loadedAttendance };
         }
 
         function parseCSV(text) {
-            const rows = [];
-            let currentRow = [];
-            let currentCell = "";
-            let insideQuotes = false;
+            const rows = []; let currentRow = []; let currentCell = ""; let insideQuotes = false;
             for (let i = 0; i < text.length; i++) {
                 const char = text[i];
-                if (char === '"') { insideQuotes = !insideQuotes; }
+                if (char === '"') insideQuotes = !insideQuotes;
                 else if (char === ',' && !insideQuotes) { currentRow.push(currentCell.trim()); currentCell = ""; }
                 else if (char === '\n' && !insideQuotes) { currentRow.push(currentCell.trim()); rows.push(currentRow); currentRow = []; currentCell = ""; }
-                else { currentCell += char; }
+                else currentCell += char;
             }
             if (currentCell) currentRow.push(currentCell.trim());
             if (currentRow.length > 0) rows.push(currentRow);
             return rows;
+        }
+        
+        function renderError(msg) {
+            document.getElementById('main-content').innerHTML = `<div class="flex flex-col items-center justify-center h-full p-8 text-center"><p class="text-red-500">${msg}</p><button onclick="window.location.reload()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded">Muat Ulang</button></div>`;
         }
     </script>
 </body>
