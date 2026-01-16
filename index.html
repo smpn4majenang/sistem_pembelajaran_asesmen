@@ -102,6 +102,11 @@
                     <i data-lucide="table" width="18" class="group-hover:text-white"></i>
                     Cek Nilai
                 </button>
+
+                <button onclick="handleMenuClick('dataSiswa')" id="btn-dataSiswa" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-cyan-600 text-blue-100 hover:text-white text-left group">
+                    <i data-lucide="graduation-cap" width="18" class="group-hover:text-white"></i>
+                    Data Siswa
+                </button>
             </nav>
 
             <div class="p-4 border-t border-blue-800 text-xs text-blue-300">
@@ -109,7 +114,7 @@
                     <span>&copy; <span id="year"></span> SMPN 4 Majenang</span>
                     <button onclick="window.location.reload()" title="Refresh Data" class="hover:text-white"><i data-lucide="refresh-cw" width="14"></i></button>
                 </div>
-                <p class="opacity-60">Versi 2.8 (Fixed Logic)</p>
+                <p class="opacity-60">Versi 3.0</p>
             </div>
         </aside>
 
@@ -150,7 +155,7 @@
             loading: true
         };
 
-        // KONFIGURASI MENU (Agar Judul Konsisten)
+        // KONFIGURASI MENU
         const MENU_CONFIG = {
             'jurnalGuru': { title: "Isi Jurnal Guru", color: "orange", key: "linkJurnalGuru", type: 'teacher' },
             'lihatJurnalGuru': { title: "Lihat Jurnal Guru", color: "pink", key: "linkLihatJurnalGuru", type: 'teacher' },
@@ -161,6 +166,7 @@
             'editJurnalKelas': { title: "Edit Jurnal Kelas", color: "fuchsia", key: "linkEditJurnalKelas", type: 'class' },
             
             'checkPresensi': { title: "Presensi Kelas", color: "teal", key: "linkPresensi", type: 'attendance' },
+            'dataSiswa': { title: "Data Siswa", color: "cyan", key: "linkDataSiswa", type: 'static' },
             'input': { title: "Input Nilai", color: "green", key: "linkInput", type: 'teacher' },
             'check': { title: "Cek Nilai", color: "blue", key: "linkCek", type: 'teacher' }
         };
@@ -208,6 +214,13 @@
                 state.actionType = 'input';
                 state.selectedItem = { name: "Input Nilai (Semua)", linkInput: globalLink };
                 state.view = 'action';
+            } else if (type === 'dataSiswa') {
+                state.actionType = 'dataSiswa';
+                state.selectedItem = { 
+                    name: "Data Murid SMPN 4 Majenang", 
+                    linkDataSiswa: "https://smpn4majenang.github.io/data-murid-smpn4-majenang/" 
+                };
+                state.view = 'action';
             } else {
                 state.actionType = type;
                 state.view = 'list';
@@ -222,7 +235,7 @@
         }
 
         function handleBackToList() {
-            if(state.actionType === 'input') {
+            if(state.actionType === 'input' || state.actionType === 'dataSiswa') {
                 state.view = 'dashboard';
                 state.actionType = null;
             } else {
@@ -235,7 +248,7 @@
         function render() {
             // Update Sidebar Active State
             document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-blue-800', 'text-white', 'bg-orange-600', 'bg-pink-600', 'bg-red-600', 'bg-purple-600', 'bg-indigo-600', 'bg-fuchsia-600', 'bg-teal-600', 'bg-green-600', 'bg-blue-600', 'shadow-md');
+                btn.classList.remove('bg-blue-800', 'text-white', 'bg-orange-600', 'bg-pink-600', 'bg-red-600', 'bg-purple-600', 'bg-indigo-600', 'bg-fuchsia-600', 'bg-teal-600', 'bg-cyan-600', 'bg-green-600', 'bg-blue-600', 'shadow-md');
                 btn.classList.add('text-blue-100');
             });
 
@@ -282,6 +295,7 @@
                             ${renderDashboardButton('checkPresensi', 'Presensi', 'teal', 'Presensi Kelas', 'Data kehadiran')}
                             ${renderDashboardButton('input', 'Nilai', 'green', 'Input Nilai', 'Form input')}
                             ${renderDashboardButton('check', 'Siswa', 'blue', 'Cek Nilai', 'Daftar nilai')}
+                            ${renderDashboardButton('dataSiswa', 'Data', 'cyan', 'Data Siswa', 'Database murid')}
                         </div>
                     </div>
                 </div>
@@ -296,6 +310,7 @@
             if(id.includes('edit')) icon = id.includes('Kelas') ? 'pencil-ruler' : 'file-pen-line';
             if(id.includes('jurnalKelas') && !id.includes('lihat') && !id.includes('edit')) icon = 'book-marked';
             if(id === 'checkPresensi') icon = 'user-check';
+            if(id === 'dataSiswa') icon = 'graduation-cap';
             if(id === 'input') icon = 'file-input';
             if(id === 'check') icon = 'table';
 
