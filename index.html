@@ -107,6 +107,11 @@
                     <i data-lucide="graduation-cap" width="18" class="group-hover:text-white"></i>
                     Data Siswa
                 </button>
+
+                <button onclick="handleMenuClick('asesmen')" id="btn-asesmen" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-rose-600 text-blue-100 hover:text-white text-left group">
+                    <i data-lucide="file-check-2" width="18" class="group-hover:text-white"></i>
+                    Asesmen
+                </button>
             </nav>
 
             <div class="p-4 border-t border-blue-800 text-xs text-blue-300">
@@ -114,7 +119,7 @@
                     <span>&copy; <span id="year"></span> SMPN 4 Majenang</span>
                     <button onclick="window.location.reload()" title="Refresh Data" class="hover:text-white"><i data-lucide="refresh-cw" width="14"></i></button>
                 </div>
-                <p class="opacity-60">Versi 3.0</p>
+                <p class="opacity-60">Versi 3.0 (Menu Updated)</p>
             </div>
         </aside>
 
@@ -167,6 +172,7 @@
             
             'checkPresensi': { title: "Presensi Kelas", color: "teal", key: "linkPresensi", type: 'attendance' },
             'dataSiswa': { title: "Data Siswa", color: "cyan", key: "linkDataSiswa", type: 'static' },
+            'asesmen': { title: "Asesmen", color: "rose", key: "linkAsesmen", type: 'static' },
             'input': { title: "Input Nilai", color: "green", key: "linkInput", type: 'teacher' },
             'check': { title: "Cek Nilai", color: "blue", key: "linkCek", type: 'teacher' }
         };
@@ -221,6 +227,13 @@
                     linkDataSiswa: "https://smpn4majenang.github.io/data-murid-smpn4-majenang/" 
                 };
                 state.view = 'action';
+            } else if (type === 'asesmen') {
+                state.actionType = 'asesmen';
+                state.selectedItem = { 
+                    name: "Administrasi Asesmen", 
+                    linkAsesmen: "https://wartam-mjng.github.io/adm-asesmen/" 
+                };
+                state.view = 'action';
             } else {
                 state.actionType = type;
                 state.view = 'list';
@@ -228,14 +241,8 @@
             render();
         }
 
-        function handleItemClick(item) {
-            state.selectedItem = item;
-            state.view = 'action';
-            render();
-        }
-
         function handleBackToList() {
-            if(state.actionType === 'input' || state.actionType === 'dataSiswa') {
+            if(state.actionType === 'input' || state.actionType === 'dataSiswa' || state.actionType === 'asesmen') {
                 state.view = 'dashboard';
                 state.actionType = null;
             } else {
@@ -248,7 +255,7 @@
         function render() {
             // Update Sidebar Active State
             document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-blue-800', 'text-white', 'bg-orange-600', 'bg-pink-600', 'bg-red-600', 'bg-purple-600', 'bg-indigo-600', 'bg-fuchsia-600', 'bg-teal-600', 'bg-cyan-600', 'bg-green-600', 'bg-blue-600', 'shadow-md');
+                btn.classList.remove('bg-blue-800', 'text-white', 'bg-orange-600', 'bg-pink-600', 'bg-red-600', 'bg-purple-600', 'bg-indigo-600', 'bg-fuchsia-600', 'bg-teal-600', 'bg-cyan-600', 'bg-rose-600', 'bg-green-600', 'bg-blue-600', 'shadow-md');
                 btn.classList.add('text-blue-100');
             });
 
@@ -296,6 +303,7 @@
                             ${renderDashboardButton('input', 'Nilai', 'green', 'Input Nilai', 'Form input')}
                             ${renderDashboardButton('check', 'Siswa', 'blue', 'Cek Nilai', 'Daftar nilai')}
                             ${renderDashboardButton('dataSiswa', 'Data', 'cyan', 'Data Siswa', 'Database murid')}
+                            ${renderDashboardButton('asesmen', 'Ujian', 'rose', 'Asesmen', 'Administrasi ujian')}
                         </div>
                     </div>
                 </div>
@@ -311,6 +319,7 @@
             if(id.includes('jurnalKelas') && !id.includes('lihat') && !id.includes('edit')) icon = 'book-marked';
             if(id === 'checkPresensi') icon = 'user-check';
             if(id === 'dataSiswa') icon = 'graduation-cap';
+            if(id === 'asesmen') icon = 'file-check-2';
             if(id === 'input') icon = 'file-input';
             if(id === 'check') icon = 'table';
 
