@@ -252,6 +252,12 @@
             render();
         }
 
+        function handleItemClick(item) {
+            state.selectedItem = item;
+            state.view = 'action';
+            render();
+        }
+
         function render() {
             // Update Sidebar Active State
             document.querySelectorAll('nav button').forEach(btn => {
