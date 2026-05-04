@@ -93,6 +93,12 @@
                     Presensi Kelas
                 </button>
 
+                <!-- NEW: Group WA -->
+                <button onclick="handleMenuClick('groupWA')" id="btn-groupWA" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-emerald-600 text-blue-100 hover:text-white text-left group">
+                    <i data-lucide="message-circle" width="18" class="group-hover:text-white"></i>
+                    Group WA
+                </button>
+
                 <button onclick="handleMenuClick('input')" id="btn-input" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-green-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="file-input" width="18" class="group-hover:text-white"></i>
                     Input Nilai
@@ -119,7 +125,7 @@
                     <span>&copy; <span id="year"></span> SMPN 4 Majenang</span>
                     <button onclick="window.location.reload()" title="Refresh Data" class="hover:text-white"><i data-lucide="refresh-cw" width="14"></i></button>
                 </div>
-                <p class="opacity-60">Versi 3.0 (Menu Updated)</p>
+                <p class="opacity-60">Versi 3.1 (Tambah WA)</p>
             </div>
         </aside>
 
@@ -148,6 +154,8 @@
     <!-- JAVASCRIPT LOGIC -->
     <script>
         const GOOGLE_SHEET_ID = "1TAq2LiT663wxPHwbWBnRN1KbkjBnGMwcU5PgsZWiQpg"; 
+        // Link khusus WA
+        const WA_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTelgSCLiUWXiCc--AXy2v2D9HxUluRA22CTcyFuj3vC8qZQKYekeBocu3tjPRr9-FLENsThClSinNX/pub?output=csv";
 
         let state = {
             view: 'dashboard', 
@@ -157,6 +165,7 @@
             teachers: [],
             classes: [],
             attendanceClasses: [],
+            waGroups: [], // State baru untuk data WA
             loading: true
         };
 
@@ -171,6 +180,7 @@
             'editJurnalKelas': { title: "Edit Jurnal Kelas", color: "fuchsia", key: "linkEditJurnalKelas", type: 'class' },
             
             'checkPresensi': { title: "Presensi Kelas", color: "teal", key: "linkPresensi", type: 'attendance' },
+            'groupWA': { title: "Group WA", color: "emerald", key: "linkGroupWA", type: 'wa' }, // Menu WA
             'dataSiswa': { title: "Data Siswa", color: "cyan", key: "linkDataSiswa", type: 'static' },
             'asesmen': { title: "Asesmen", color: "rose", key: "linkAsesmen", type: 'static' },
             'input': { title: "Input Nilai", color: "green", key: "linkInput", type: 'teacher' },
@@ -182,10 +192,11 @@
 
         async function initApp() {
             try {
-                const data = await fetchFromGoogleSheet(GOOGLE_SHEET_ID);
+                const data = await fetchFromGoogleSheet(GOOGLE_SHEET_ID, WA_SHEET_URL);
                 state.teachers = data.teachers;
                 state.classes = data.classes;
                 state.attendanceClasses = data.attendanceClasses;
+                state.waGroups = data.waGroups;
                 state.loading = false;
                 render(); 
             } catch (e) {
@@ -261,7 +272,7 @@
         function render() {
             // Update Sidebar Active State
             document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-blue-800', 'text-white', 'bg-orange-600', 'bg-pink-600', 'bg-red-600', 'bg-purple-600', 'bg-indigo-600', 'bg-fuchsia-600', 'bg-teal-600', 'bg-cyan-600', 'bg-rose-600', 'bg-green-600', 'bg-blue-600', 'shadow-md');
+                btn.classList.remove('bg-blue-800', 'text-white', 'bg-orange-600', 'bg-pink-600', 'bg-red-600', 'bg-purple-600', 'bg-indigo-600', 'bg-fuchsia-600', 'bg-teal-600', 'bg-emerald-600', 'bg-cyan-600', 'bg-rose-600', 'bg-green-600', 'bg-blue-600', 'shadow-md');
                 btn.classList.add('text-blue-100');
             });
 
@@ -306,6 +317,7 @@
                             ${renderDashboardButton('editJurnalKelas', 'Edit', 'fuchsia', 'Edit Jurnal Kelas', 'Koreksi agenda')}
                             
                             ${renderDashboardButton('checkPresensi', 'Presensi', 'teal', 'Presensi Kelas', 'Data kehadiran')}
+                            ${renderDashboardButton('groupWA', 'WA', 'emerald', 'Group WA', 'Komunikasi kelas')}
                             ${renderDashboardButton('input', 'Nilai', 'green', 'Input Nilai', 'Form input')}
                             ${renderDashboardButton('check', 'Siswa', 'blue', 'Cek Nilai', 'Daftar nilai')}
                             ${renderDashboardButton('dataSiswa', 'Data', 'cyan', 'Data Siswa', 'Database murid')}
@@ -324,6 +336,7 @@
             if(id.includes('edit')) icon = id.includes('Kelas') ? 'pencil-ruler' : 'file-pen-line';
             if(id.includes('jurnalKelas') && !id.includes('lihat') && !id.includes('edit')) icon = 'book-marked';
             if(id === 'checkPresensi') icon = 'user-check';
+            if(id === 'groupWA') icon = 'message-circle';
             if(id === 'dataSiswa') icon = 'graduation-cap';
             if(id === 'asesmen') icon = 'file-check-2';
             if(id === 'input') icon = 'file-input';
@@ -348,6 +361,7 @@
             // Select Data Source based on config type
             if(config.type === 'class') dataSource = state.classes;
             else if(config.type === 'attendance') dataSource = state.attendanceClasses;
+            else if(config.type === 'wa') dataSource = state.waGroups;
             else { dataSource = state.teachers; isTeacher = true; }
 
             const filtered = dataSource.filter(item => 
@@ -358,10 +372,11 @@
             let listHtml = filtered.length > 0 ? filtered.map(item => {
                 let subHtml = '';
                 // Dynamic Badge content based on action type
-                if(config.type === 'class' || config.type === 'attendance') {
+                if(config.type === 'class' || config.type === 'attendance' || config.type === 'wa') {
                     let badgeLabel = "Link";
                     if(state.actionType.includes('lihat')) badgeLabel = "Rekap";
                     if(state.actionType.includes('edit')) badgeLabel = "Edit";
+                    if(config.type === 'wa') badgeLabel = "Join Link";
                     subHtml = `<span class="text-xs bg-${config.color}-50 text-${config.color}-700 px-2 py-1 rounded border border-${config.color}-100">${badgeLabel}</span>`;
                 } else {
                     // Teacher subjects
@@ -370,13 +385,19 @@
                         `<span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 truncate max-w-[150px] inline-block">${s}</span>`
                     ).join('');
                 }
+                
+                // Icon Logics
+                let iconUser = 'users';
+                if(isTeacher) iconUser = 'user';
+                if(config.type === 'attendance') iconUser = 'calendar-check';
+                if(config.type === 'wa') iconUser = 'message-circle';
 
                 return `
                 <button onclick='handleItemClick(${JSON.stringify(item).replace(/'/g, "&#39;")})'
                     class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-${config.color}-300 transition-all text-left group">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
                         <div class="h-10 w-10 rounded-full bg-${config.color}-50 text-${config.color}-600 flex items-center justify-center shrink-0">
-                            <i data-lucide="${isTeacher ? 'user' : 'users'}" width="20"></i>
+                            <i data-lucide="${iconUser}" width="20"></i>
                         </div>
                         <div class="min-w-0">
                             <h4 class="font-bold text-gray-900 truncate">${item.name}</h4>
@@ -397,7 +418,7 @@
                     </div>
                     <div class="relative mb-6">
                         <input type="text" oninput="state.searchTerm = this.value; render()" value="${state.searchTerm}" 
-                            placeholder="${isTeacher ? 'Cari nama guru...' : 'Cari nama kelas...'}"
+                            placeholder="${isTeacher ? 'Cari nama guru...' : 'Cari nama kelas/grup...'}"
                             class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-${config.color}-500 outline-none transition-all">
                         <i data-lucide="search" width="20" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     </div>
@@ -412,6 +433,12 @@
             // Get link dynamically based on the key in config
             let link = item[config.key] || "#";
             const isInvalid = !link || link === '#' || link.length < 5;
+
+            // WhatsApp link fallback notice
+            let iframeNotice = `<span>Jika kosong, klik tombol <strong>"Buka Tab Baru"</strong> di pojok kanan.</span>`;
+            if (state.actionType === 'groupWA') {
+                iframeNotice = `<span>Link WhatsApp tidak bisa dibuka di sini. Silakan klik <strong>"Buka Tab Baru"</strong>.</span>`;
+            }
 
             return `
                 <div class="flex flex-col h-full bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden fade-in">
@@ -431,16 +458,25 @@
                     </div>
                     <div class="flex-1 relative bg-gray-100">
                         ${isInvalid ? `<div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center"><div class="bg-white p-6 rounded-xl shadow-lg max-w-sm"><h3 class="font-bold text-gray-800">Link Tidak Tersedia</h3><p class="text-sm text-gray-500 mt-1">Data link belum diatur.</p></div></div>` : 
-                        `<div class="absolute top-0 left-0 w-full bg-yellow-50 px-3 py-1.5 text-[10px] text-yellow-800 flex justify-center gap-2 border-b border-yellow-100 z-10"><span>Jika kosong, klik tombol <strong>"Buka Tab Baru"</strong>.</span></div><iframe src="${link}" class="w-full h-full border-none pt-6"></iframe>`}
+                        `<div class="absolute top-0 left-0 w-full bg-yellow-50 px-3 py-1.5 text-[10px] text-yellow-800 flex justify-center gap-2 border-b border-yellow-100 z-10">${iframeNotice}</div><iframe src="${link}" class="w-full h-full border-none pt-6"></iframe>`}
                     </div>
                 </div>`;
         }
 
-        async function fetchFromGoogleSheet(id) {
-            const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv`;
-            const response = await fetch(url);
-            const text = await response.text();
-            const rows = parseCSV(text);
+        async function fetchFromGoogleSheet(idMain, urlWa) {
+            // Ambil dari 2 link sekaligus secara paralel
+            const urlMain = `https://docs.google.com/spreadsheets/d/${idMain}/gviz/tq?tqx=out:csv`;
+            
+            const [resMain, resWa] = await Promise.all([
+                fetch(urlMain),
+                fetch(urlWa)
+            ]);
+
+            const textMain = await resMain.text();
+            const textWa = await resWa.text();
+            
+            const rows = parseCSV(textMain);
+            const rowsWa = parseCSV(textWa);
 
             const loadedTeachers = rows.slice(1).map((row, index) => ({
                 id: `t-${index}`, name: row[0]||"", subject: row[1]||"", linkInput: row[2]||"#", linkCek: row[3]||"#", 
@@ -455,7 +491,15 @@
                 id: `p-${index}`, name: row[13]||"", linkPresensi: row[14]||"#"
             })).filter(a => a.name !== "" && a.name.toLowerCase() !== "nama kelas");
 
-            return { teachers: loadedTeachers, classes: loadedClasses, attendanceClasses: loadedAttendance };
+            // Mengurai khusus WA: Link di Kolom P (Index 15). Nama ambil dari Kolom N (Index 13)
+            const loadedWa = rowsWa.slice(1).map((row, index) => ({
+                id: `w-${index}`, 
+                name: row[13] || `Grup ${index + 1}`, // Kolom N (Index 13)
+                linkGroupWA: row[15] || "#",          // Kolom P (Index 15)
+                type: 'wa'
+            })).filter(w => w.linkGroupWA !== "" && w.linkGroupWA !== "#" && w.name.toLowerCase() !== "nama kelas");
+
+            return { teachers: loadedTeachers, classes: loadedClasses, attendanceClasses: loadedAttendance, waGroups: loadedWa };
         }
 
         function parseCSV(text) {
