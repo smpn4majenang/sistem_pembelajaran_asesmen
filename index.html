@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Pembelajaran dan Asesmen - SMPN 4 Majenang</title>
     
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Lucide Icons -->
@@ -67,12 +67,11 @@
                     Edit Jurnal Guru
                 </button>
 
-                <!-- NEW: Administrasi Guru Wali -->
+                <!-- Administrasi Guru Wali -->
                 <button onclick="handleMenuClick('administrasiWali')" id="btn-administrasiWali" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-amber-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="user-cog" width="18" class="group-hover:text-white"></i>
                     Administrasi Guru Wali
                 </button>
-                
 
                 <div class="my-2 border-t border-blue-800/50"></div>
                 <p class="px-3 text-xs font-semibold text-blue-300 uppercase tracking-wider mb-2">Jurnal Kelas</p>
@@ -100,7 +99,7 @@
                     Presensi Kelas
                 </button>
 
-                <!-- NEW: Group WA -->
+                <!-- Group WA -->
                 <button onclick="handleMenuClick('groupWA')" id="btn-groupWA" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-emerald-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="message-circle" width="18" class="group-hover:text-white"></i>
                     Group WA
@@ -132,11 +131,11 @@
                     <span>&copy; <span id="year"></span> SMPN 4 Majenang</span>
                     <button onclick="window.location.reload()" title="Refresh Data" class="hover:text-white"><i data-lucide="refresh-cw" width="14"></i></button>
                 </div>
-                <p class="opacity-60">Versi 3.1 (Tambah WA)</p>
+                <p class="opacity-60">Versi 3.1 (Fixed & Stable)</p>
             </div>
         </aside>
 
-        <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden glass"></div>
+        <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
 
         <!-- MAIN CONTENT -->
         <div class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50">
@@ -161,7 +160,6 @@
     <!-- JAVASCRIPT LOGIC -->
     <script>
         const GOOGLE_SHEET_ID = "1TAq2LiT663wxPHwbWBnRN1KbkjBnGMwcU5PgsZWiQpg"; 
-        // Link khusus WA
         const WA_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTelgSCLiUWXiCc--AXy2v2D9HxUluRA22CTcyFuj3vC8qZQKYekeBocu3tjPRr9-FLENsThClSinNX/pub?output=csv";
 
         let state = {
@@ -172,22 +170,40 @@
             teachers: [],
             classes: [],
             attendanceClasses: [],
-            waGroups: [], // State baru untuk data WA
+            waGroups: [],
             loading: true
         };
 
-        // KONFIGURASI MENU
+        // KONFIGURASI COLOR PALETTE STATIS UNTUK TAILWIND CDN
+        const COLOR_STYLES = {
+            orange:  { bg: 'bg-orange-600', active: 'bg-orange-600', hoverBg: 'hover:bg-orange-50', hoverBorder: 'hover:border-orange-200', text: 'text-orange-700', iconText: 'text-orange-600', badgeBg: 'bg-orange-100', lightBg: 'bg-orange-50', border: 'border-orange-100', ring: 'focus:ring-orange-500' },
+            pink:    { bg: 'bg-pink-600', active: 'bg-pink-600', hoverBg: 'hover:bg-pink-50', hoverBorder: 'hover:border-pink-200', text: 'text-pink-700', iconText: 'text-pink-600', badgeBg: 'bg-pink-100', lightBg: 'bg-pink-50', border: 'border-pink-100', ring: 'focus:ring-pink-500' },
+            red:     { bg: 'bg-red-600', active: 'bg-red-600', hoverBg: 'hover:bg-red-50', hoverBorder: 'hover:border-red-200', text: 'text-red-700', iconText: 'text-red-600', badgeBg: 'bg-red-100', lightBg: 'bg-red-50', border: 'border-red-100', ring: 'focus:ring-red-500' },
+            amber:   { bg: 'bg-amber-600', active: 'bg-amber-600', hoverBg: 'hover:bg-amber-50', hoverBorder: 'hover:border-amber-200', text: 'text-amber-700', iconText: 'text-amber-600', badgeBg: 'bg-amber-100', lightBg: 'bg-amber-50', border: 'border-amber-100', ring: 'focus:ring-amber-500' },
+            purple:  { bg: 'bg-purple-600', active: 'bg-purple-600', hoverBg: 'hover:bg-purple-50', hoverBorder: 'hover:border-purple-200', text: 'text-purple-700', iconText: 'text-purple-600', badgeBg: 'bg-purple-100', lightBg: 'bg-purple-50', border: 'border-purple-100', ring: 'focus:ring-purple-500' },
+            indigo:  { bg: 'bg-indigo-600', active: 'bg-indigo-600', hoverBg: 'hover:bg-indigo-50', hoverBorder: 'hover:border-indigo-200', text: 'text-indigo-700', iconText: 'text-indigo-600', badgeBg: 'bg-indigo-100', lightBg: 'bg-indigo-50', border: 'border-indigo-100', ring: 'focus:ring-indigo-500' },
+            fuchsia: { bg: 'bg-fuchsia-600', active: 'bg-fuchsia-600', hoverBg: 'hover:bg-fuchsia-50', hoverBorder: 'hover:border-fuchsia-200', text: 'text-fuchsia-700', iconText: 'text-fuchsia-600', badgeBg: 'bg-fuchsia-100', lightBg: 'bg-fuchsia-50', border: 'border-fuchsia-100', ring: 'focus:ring-fuchsia-500' },
+            teal:    { bg: 'bg-teal-600', active: 'bg-teal-600', hoverBg: 'hover:bg-teal-50', hoverBorder: 'hover:border-teal-200', text: 'text-teal-700', iconText: 'text-teal-600', badgeBg: 'bg-teal-100', lightBg: 'bg-teal-50', border: 'border-teal-100', ring: 'focus:ring-teal-500' },
+            emerald: { bg: 'bg-emerald-600', active: 'bg-emerald-600', hoverBg: 'hover:bg-emerald-50', hoverBorder: 'hover:border-emerald-200', text: 'text-emerald-700', iconText: 'text-emerald-600', badgeBg: 'bg-emerald-100', lightBg: 'bg-emerald-50', border: 'border-emerald-100', ring: 'focus:ring-emerald-500' },
+            green:   { bg: 'bg-green-600', active: 'bg-green-600', hoverBg: 'hover:bg-green-50', hoverBorder: 'hover:border-green-200', text: 'text-green-700', iconText: 'text-green-600', badgeBg: 'bg-green-100', lightBg: 'bg-green-50', border: 'border-green-100', ring: 'focus:ring-green-500' },
+            blue:    { bg: 'bg-blue-600', active: 'bg-blue-600', hoverBg: 'hover:bg-blue-50', hoverBorder: 'hover:border-blue-200', text: 'text-blue-700', iconText: 'text-blue-600', badgeBg: 'bg-blue-100', lightBg: 'bg-blue-50', border: 'border-blue-100', ring: 'focus:ring-blue-500' },
+            cyan:    { bg: 'bg-cyan-600', active: 'bg-cyan-600', hoverBg: 'hover:bg-cyan-50', hoverBorder: 'hover:border-cyan-200', text: 'text-cyan-700', iconText: 'text-cyan-600', badgeBg: 'bg-cyan-100', lightBg: 'bg-cyan-50', border: 'border-cyan-100', ring: 'focus:ring-cyan-500' },
+            rose:    { bg: 'bg-rose-600', active: 'bg-rose-600', hoverBg: 'hover:bg-rose-50', hoverBorder: 'hover:border-rose-200', text: 'text-rose-700', iconText: 'text-rose-600', badgeBg: 'bg-rose-100', lightBg: 'bg-rose-50', border: 'border-rose-100', ring: 'focus:ring-rose-500' }
+        };
+
+        // KONFIGURASI MENU (TERMASUK ADMINISTRASI WALI GURU)
         const MENU_CONFIG = {
             'jurnalGuru': { title: "Isi Jurnal Guru", color: "orange", key: "linkJurnalGuru", type: 'teacher' },
             'lihatJurnalGuru': { title: "Lihat Jurnal Guru", color: "pink", key: "linkLihatJurnalGuru", type: 'teacher' },
             'editJurnalGuru': { title: "Edit Jurnal Guru", color: "red", key: "linkEditJurnalGuru", type: 'teacher' },
+            'administrasiWali': { title: "Administrasi Guru Wali", color: "amber", key: "linkAdministrasiWali", type: 'teacher' },
             
             'jurnalKelas': { title: "Isi Jurnal Kelas", color: "purple", key: "linkJurnal", type: 'class' },
             'lihatJurnalKelas': { title: "Lihat Jurnal Kelas", color: "indigo", key: "linkLihatJurnalKelas", type: 'class' },
             'editJurnalKelas': { title: "Edit Jurnal Kelas", color: "fuchsia", key: "linkEditJurnalKelas", type: 'class' },
             
             'checkPresensi': { title: "Presensi Kelas", color: "teal", key: "linkPresensi", type: 'attendance' },
-            'groupWA': { title: "Group WA", color: "emerald", key: "linkGroupWA", type: 'wa' }, // Menu WA
+            'groupWA': { title: "Group WA", color: "emerald", key: "linkGroupWA", type: 'wa' },
             'dataSiswa': { title: "Data Siswa", color: "cyan", key: "linkDataSiswa", type: 'static' },
             'asesmen': { title: "Asesmen", color: "rose", key: "linkAsesmen", type: 'static' },
             'input': { title: "Input Nilai", color: "green", key: "linkInput", type: 'teacher' },
@@ -208,7 +224,7 @@
                 render(); 
             } catch (e) {
                 console.error(e);
-                renderError("Gagal memuat data. Periksa koneksi internet atau ID Sheet.");
+                renderError("Gagal memuat data dari Google Sheets. Pastikan Spreadsheet sudah di-Publish ke Web atau diatur 'Siapa saja yang memiliki link dapat melihat'.");
             }
         }
 
@@ -270,30 +286,39 @@
             render();
         }
 
-        function handleItemClick(item) {
-            state.selectedItem = item;
-            state.view = 'action';
-            render();
+        function handleItemClickById(itemId) {
+            let item = null;
+            const config = MENU_CONFIG[state.actionType];
+            
+            if (config.type === 'class') item = state.classes.find(c => c.id === itemId);
+            else if (config.type === 'attendance') item = state.attendanceClasses.find(a => a.id === itemId);
+            else if (config.type === 'wa') item = state.waGroups.find(w => w.id === itemId);
+            else item = state.teachers.find(t => t.id === itemId);
+
+            if (item) {
+                state.selectedItem = item;
+                state.view = 'action';
+                render();
+            }
         }
 
         function render() {
-            // Update Sidebar Active State
+            // Reset Sidebar Styling
             document.querySelectorAll('nav button').forEach(btn => {
-                btn.classList.remove('bg-blue-800', 'text-white', 'bg-orange-600', 'bg-pink-600', 'bg-red-600', 'bg-purple-600', 'bg-indigo-600', 'bg-fuchsia-600', 'bg-teal-600', 'bg-emerald-600', 'bg-cyan-600', 'bg-rose-600', 'bg-green-600', 'bg-blue-600', 'shadow-md');
-                btn.classList.add('text-blue-100');
+                btn.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-blue-800 text-blue-100 hover:text-white text-left group";
             });
 
             if (state.view === 'dashboard') {
                 const dashBtn = document.getElementById('btn-dashboard');
-                if(dashBtn) dashBtn.classList.add('bg-blue-800', 'text-white');
+                if(dashBtn) dashBtn.className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors bg-blue-800 text-white text-left";
                 document.getElementById('main-content').innerHTML = renderDashboard();
             } else {
                 const btnId = 'btn-' + state.actionType;
                 const btn = document.getElementById(btnId);
-                if (btn) {
-                    const config = MENU_CONFIG[state.actionType];
-                    btn.classList.remove('text-blue-100');
-                    btn.classList.add('text-white', 'shadow-md', `bg-${config.color}-600`);
+                const config = MENU_CONFIG[state.actionType];
+                
+                if (btn && config && COLOR_STYLES[config.color]) {
+                    btn.className = `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-white shadow-md ${COLOR_STYLES[config.color].bg} text-left group`;
                 }
                 
                 if (state.view === 'list') {
@@ -302,7 +327,7 @@
                     document.getElementById('main-content').innerHTML = renderAction();
                 }
             }
-            setTimeout(() => lucide.createIcons(), 50);
+            setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
         }
 
         function renderDashboard() {
@@ -318,6 +343,7 @@
                             ${renderDashboardButton('jurnalGuru', 'Isi', 'orange', 'Jurnal Guru', 'Agenda harian')}
                             ${renderDashboardButton('lihatJurnalGuru', 'Lihat', 'pink', 'Lihat Jurnal Guru', 'Monitoring')}
                             ${renderDashboardButton('editJurnalGuru', 'Edit', 'red', 'Edit Jurnal Guru', 'Koreksi data')}
+                            ${renderDashboardButton('administrasiWali', 'Wali', 'amber', 'Administrasi Guru Wali', 'Kelola wali kelas')}
                             
                             ${renderDashboardButton('jurnalKelas', 'Isi', 'purple', 'Isi Jurnal Kelas', 'Agenda kelas')}
                             ${renderDashboardButton('lihatJurnalKelas', 'Lihat', 'indigo', 'Lihat Jurnal Kelas', 'Monitoring')}
@@ -336,12 +362,12 @@
         }
 
         function renderDashboardButton(id, badge, color, title, desc) {
-            // Mapping icon based on id
             let icon = 'circle';
             if(id.includes('jurnalGuru')) icon = 'clipboard-list';
             if(id.includes('lihat')) icon = id.includes('Kelas') ? 'file-search' : 'eye';
             if(id.includes('edit')) icon = id.includes('Kelas') ? 'pencil-ruler' : 'file-pen-line';
             if(id.includes('jurnalKelas') && !id.includes('lihat') && !id.includes('edit')) icon = 'book-marked';
+            if(id === 'administrasiWali') icon = 'user-cog';
             if(id === 'checkPresensi') icon = 'user-check';
             if(id === 'groupWA') icon = 'message-circle';
             if(id === 'dataSiswa') icon = 'graduation-cap';
@@ -349,11 +375,13 @@
             if(id === 'input') icon = 'file-input';
             if(id === 'check') icon = 'table';
 
+            const cs = COLOR_STYLES[color] || COLOR_STYLES.blue;
+
             return `
-            <button onclick="handleMenuClick('${id}')" class="p-4 border rounded-xl hover:bg-${color}-50 hover:border-${color}-200 hover:text-${color}-700 transition-all text-left group">
+            <button onclick="handleMenuClick('${id}')" class="p-4 border rounded-xl ${cs.hoverBg} ${cs.hoverBorder} transition-all text-left group">
                 <div class="flex justify-between items-start mb-2">
-                    <i data-lucide="${icon}" width="24" class="text-gray-400 group-hover:text-${color}-600"></i>
-                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:bg-${color}-100 group-hover:text-${color}-700">${badge}</span>
+                    <i data-lucide="${icon}" width="24" class="text-gray-400 group-hover:${cs.iconText}"></i>
+                    <span class="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded group-hover:${cs.badgeBg} group-hover:${cs.text}">${badge}</span>
                 </div>
                 <span class="font-bold text-sm block">${title}</span>
                 <span class="text-xs text-gray-400">${desc}</span>
@@ -362,48 +390,45 @@
 
         function renderList() {
             const config = MENU_CONFIG[state.actionType];
+            const cs = COLOR_STYLES[config.color] || COLOR_STYLES.blue;
             let dataSource = [];
             let isTeacher = false;
 
-            // Select Data Source based on config type
             if(config.type === 'class') dataSource = state.classes;
             else if(config.type === 'attendance') dataSource = state.attendanceClasses;
             else if(config.type === 'wa') dataSource = state.waGroups;
             else { dataSource = state.teachers; isTeacher = true; }
 
             const filtered = dataSource.filter(item => 
-                item.name.toLowerCase().includes(state.searchTerm.toLowerCase()) || 
+                (item.name && item.name.toLowerCase().includes(state.searchTerm.toLowerCase())) || 
                 (item.subject && item.subject.toLowerCase().includes(state.searchTerm.toLowerCase()))
             );
 
             let listHtml = filtered.length > 0 ? filtered.map(item => {
                 let subHtml = '';
-                // Dynamic Badge content based on action type
                 if(config.type === 'class' || config.type === 'attendance' || config.type === 'wa') {
                     let badgeLabel = "Link";
                     if(state.actionType.includes('lihat')) badgeLabel = "Rekap";
                     if(state.actionType.includes('edit')) badgeLabel = "Edit";
                     if(config.type === 'wa') badgeLabel = "Join Link";
-                    subHtml = `<span class="text-xs bg-${config.color}-50 text-${config.color}-700 px-2 py-1 rounded border border-${config.color}-100">${badgeLabel}</span>`;
+                    subHtml = `<span class="text-xs ${cs.lightBg} ${cs.text} px-2 py-1 rounded border ${cs.border}">${badgeLabel}</span>`;
                 } else {
-                    // Teacher subjects
-                    const subjects = item.subject.split(',').map(s => s.trim()).filter(s => s);
+                    const subjects = (item.subject || "").split(',').map(s => s.trim()).filter(s => s);
                     subHtml = subjects.map(s => 
                         `<span class="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200 truncate max-w-[150px] inline-block">${s}</span>`
                     ).join('');
                 }
                 
-                // Icon Logics
                 let iconUser = 'users';
                 if(isTeacher) iconUser = 'user';
                 if(config.type === 'attendance') iconUser = 'calendar-check';
                 if(config.type === 'wa') iconUser = 'message-circle';
 
                 return `
-                <button onclick='handleItemClick(${JSON.stringify(item).replace(/'/g, "&#39;")})'
-                    class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-${config.color}-300 transition-all text-left group">
+                <button onclick="handleItemClickById('${item.id}')"
+                    class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md ${cs.hoverBorder} transition-all text-left group">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
-                        <div class="h-10 w-10 rounded-full bg-${config.color}-50 text-${config.color}-600 flex items-center justify-center shrink-0">
+                        <div class="h-10 w-10 rounded-full ${cs.lightBg} ${cs.iconText} flex items-center justify-center shrink-0">
                             <i data-lucide="${iconUser}" width="20"></i>
                         </div>
                         <div class="min-w-0">
@@ -411,7 +436,7 @@
                             <div class="flex flex-wrap gap-1 mt-1">${subHtml}</div>
                         </div>
                     </div>
-                    <div class="hidden sm:block"><i data-lucide="chevron-right" width="20" class="text-gray-300 group-hover:text-${config.color}-500"></i></div>
+                    <div class="hidden sm:block"><i data-lucide="chevron-right" width="20" class="text-gray-300 group-hover:${cs.iconText}"></i></div>
                 </button>`;
             }).join('') : `<div class="text-center py-12 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200 col-span-full"><p>Data tidak ditemukan.</p></div>`;
 
@@ -426,7 +451,7 @@
                     <div class="relative mb-6">
                         <input type="text" oninput="state.searchTerm = this.value; render()" value="${state.searchTerm}" 
                             placeholder="${isTeacher ? 'Cari nama guru...' : 'Cari nama kelas/grup...'}"
-                            class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 shadow-sm focus:ring-2 focus:ring-${config.color}-500 outline-none transition-all">
+                            class="w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 shadow-sm ${cs.ring} outline-none transition-all">
                         <i data-lucide="search" width="20" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 pb-8">${listHtml}</div>
@@ -434,17 +459,16 @@
         }
 
         function renderAction() {
-            const item = state.selectedItem;
-            const config = MENU_CONFIG[state.actionType];
+            const item = state.selectedItem || {};
+            const config = MENU_CONFIG[state.actionType] || {};
+            const cs = COLOR_STYLES[config.color] || COLOR_STYLES.blue;
             
-            // Get link dynamically based on the key in config
             let link = item[config.key] || "#";
             const isInvalid = !link || link === '#' || link.length < 5;
 
-            // WhatsApp link fallback notice
             let iframeNotice = `<span>Jika kosong, klik tombol <strong>"Buka Tab Baru"</strong> di pojok kanan.</span>`;
             if (state.actionType === 'groupWA') {
-                iframeNotice = `<span>Link WhatsApp tidak bisa dibuka di sini. Silakan klik <strong>"Buka Tab Baru"</strong>.</span>`;
+                iframeNotice = `<span>Link WhatsApp tidak dapat dibuka di dalam frame. Silakan klik <strong>"Buka Tab Baru"</strong>.</span>`;
             }
 
             return `
@@ -456,22 +480,21 @@
                             </button>
                             <div class="border-l border-gray-300 pl-3">
                                 <div class="flex flex-col">
-                                    <h3 class="font-bold text-gray-800 text-sm md:text-base truncate max-w-[300px]">${item.name}</h3>
-                                    <span class="text-xs text-${config.color}-600 font-medium uppercase tracking-wide">${config.title}</span>
+                                    <h3 class="font-bold text-gray-800 text-sm md:text-base truncate max-w-[300px]">${item.name || 'Detail'}</h3>
+                                    <span class="text-xs ${cs.text} font-medium uppercase tracking-wide">${config.title || ''}</span>
                                 </div>
                             </div>
                         </div>
                         ${!isInvalid ? `<a href="${link}" target="_blank" class="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 transition-colors"><span class="hidden sm:inline">Buka Tab Baru</span><i data-lucide="external-link" width="14"></i></a>` : ''}
                     </div>
                     <div class="flex-1 relative bg-gray-100">
-                        ${isInvalid ? `<div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center"><div class="bg-white p-6 rounded-xl shadow-lg max-w-sm"><h3 class="font-bold text-gray-800">Link Tidak Tersedia</h3><p class="text-sm text-gray-500 mt-1">Data link belum diatur.</p></div></div>` : 
+                        ${isInvalid ? `<div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center"><div class="bg-white p-6 rounded-xl shadow-lg max-w-sm"><h3 class="font-bold text-gray-800">Link Tidak Tersedia</h3><p class="text-sm text-gray-500 mt-1">Link tautan belum diatur pada Google Sheet.</p></div></div>` : 
                         `<div class="absolute top-0 left-0 w-full bg-yellow-50 px-3 py-1.5 text-[10px] text-yellow-800 flex justify-center gap-2 border-b border-yellow-100 z-10">${iframeNotice}</div><iframe src="${link}" class="w-full h-full border-none pt-6"></iframe>`}
                     </div>
                 </div>`;
         }
 
         async function fetchFromGoogleSheet(idMain, urlWa) {
-            // Ambil dari 2 link sekaligus secara paralel
             const urlMain = `https://docs.google.com/spreadsheets/d/${idMain}/gviz/tq?tqx=out:csv`;
             
             const [resMain, resWa] = await Promise.all([
@@ -479,32 +502,53 @@
                 fetch(urlWa)
             ]);
 
+            if (!resMain.ok) throw new Error("Gagal mengambil data dari Google Sheet Utama");
+
             const textMain = await resMain.text();
-            const textWa = await resWa.text();
+            let textWa = "";
+            if (resWa.ok) {
+                textWa = await resWa.text();
+            }
             
             const rows = parseCSV(textMain);
-            const rowsWa = parseCSV(textWa);
+            const rowsWa = textWa ? parseCSV(textWa) : [];
 
+            // Membaca Guru (Kolom A-G / Index 0-6) + Kolom H (Index 7) untuk Administrasi Wali
             const loadedTeachers = rows.slice(1).map((row, index) => ({
-                id: `t-${index}`, name: row[0]||"", subject: row[1]||"", linkInput: row[2]||"#", linkCek: row[3]||"#", 
-                linkJurnalGuru: row[4]||"#", linkLihatJurnalGuru: row[5]||"#", linkEditJurnalGuru: row[6]||"#"
+                id: `t-${index}`, 
+                name: row[0] || "", 
+                subject: row[1] || "", 
+                linkInput: row[2] || "#", 
+                linkCek: row[3] || "#", 
+                linkJurnalGuru: row[4] || "#", 
+                linkLihatJurnalGuru: row[5] || "#", 
+                linkEditJurnalGuru: row[6] || "#",
+                linkAdministrasiWali: row[7] || "#"
             })).filter(t => t.name !== "" && t.name.toLowerCase() !== "nama guru");
 
+            // Membaca Jurnal Kelas (Kolom I-L / Index 8-11)
             const loadedClasses = rows.slice(1).map((row, index) => ({
-                id: `c-${index}`, name: row[8]||"", linkJurnal: row[9]||"#", linkLihatJurnalKelas: row[10]||"#", linkEditJurnalKelas: row[11]||"#"
+                id: `c-${index}`, 
+                name: row[8] || "", 
+                linkJurnal: row[9] || "#", 
+                linkLihatJurnalKelas: row[10] || "#", 
+                linkEditJurnalKelas: row[11] || "#"
             })).filter(c => c.name !== "" && c.name.toLowerCase() !== "nama kelas");
 
+            // Membaca Presensi Kelas (Kolom N-O / Index 13-14)
             const loadedAttendance = rows.slice(1).map((row, index) => ({
-                id: `p-${index}`, name: row[13]||"", linkPresensi: row[14]||"#"
+                id: `p-${index}`, 
+                name: row[13] || "", 
+                linkPresensi: row[14] || "#"
             })).filter(a => a.name !== "" && a.name.toLowerCase() !== "nama kelas");
 
-            // Mengurai khusus WA: Link di Kolom P (Index 15). Nama ambil dari Kolom N (Index 13)
-            const loadedWa = rowsWa.slice(1).map((row, index) => ({
+            // Membaca khusus Group WA dari Sheet Publik WA (Nama: Index 13 / Kolom N, Link: Index 15 / Kolom P)
+            const loadedWa = rowsWa.length > 1 ? rowsWa.slice(1).map((row, index) => ({
                 id: `w-${index}`, 
-                name: row[13] || `Grup ${index + 1}`, // Kolom N (Index 13)
-                linkGroupWA: row[15] || "#",          // Kolom P (Index 15)
+                name: row[13] || `Grup ${index + 1}`, 
+                linkGroupWA: row[15] || "#", 
                 type: 'wa'
-            })).filter(w => w.linkGroupWA !== "" && w.linkGroupWA !== "#" && w.name.toLowerCase() !== "nama kelas");
+            })).filter(w => w.linkGroupWA !== "" && w.linkGroupWA !== "#" && w.name.toLowerCase() !== "nama kelas") : [];
 
             return { teachers: loadedTeachers, classes: loadedClasses, attendanceClasses: loadedAttendance, waGroups: loadedWa };
         }
@@ -524,7 +568,16 @@
         }
         
         function renderError(msg) {
-            document.getElementById('main-content').innerHTML = `<div class="flex flex-col items-center justify-center h-full p-8 text-center"><p class="text-red-500">${msg}</p><button onclick="window.location.reload()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded">Muat Ulang</button></div>`;
+            document.getElementById('main-content').innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full p-8 text-center max-w-md mx-auto">
+                    <div class="bg-red-50 text-red-600 p-4 rounded-full mb-4">
+                        <i data-lucide="alert-triangle" width="32"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 text-lg mb-2">Terjadi Kesalahan</h3>
+                    <p class="text-sm text-gray-500 mb-6">${msg}</p>
+                    <button onclick="window.location.reload()" class="px-5 py-2.5 bg-blue-900 hover:bg-blue-800 text-white font-medium text-sm rounded-lg shadow-sm transition-colors">Coba Lagi</button>
+                </div>`;
+            setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
         }
     </script>
 </body>
