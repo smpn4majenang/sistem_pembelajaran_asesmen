@@ -105,6 +105,12 @@
                     Group WA
                 </button>
 
+                <!-- Broadcast WA -->
+                <button onclick="handleMenuClick('broadcastWA')" id="btn-broadcastWA" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-emerald-600 text-blue-100 hover:text-white text-left group">
+                    <i data-lucide="send" width="18" class="group-hover:text-white"></i>
+                    Broadcast WA
+                </button>
+
                 <button onclick="handleMenuClick('input')" id="btn-input" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-green-600 text-blue-100 hover:text-white text-left group">
                     <i data-lucide="file-input" width="18" class="group-hover:text-white"></i>
                     Input Nilai
@@ -204,6 +210,7 @@
             
             'checkPresensi': { title: "Presensi Kelas", color: "teal", key: "linkPresensi", type: 'attendance' },
             'groupWA': { title: "Group WA", color: "emerald", key: "linkGroupWA", type: 'wa' },
+            'broadcastWA': { title: "Broadcast WA", color: "emerald", key: "linkBroadcastWA", type: 'static' },
             'dataSiswa': { title: "Data Siswa", color: "cyan", key: "linkDataSiswa", type: 'static' },
             'asesmen': { title: "Asesmen", color: "rose", key: "linkAsesmen", type: 'static' },
             'input': { title: "Input Nilai", color: "green", key: "linkInput", type: 'teacher' },
@@ -268,6 +275,13 @@
                     linkAsesmen: "https://wartam-mjng.github.io/adm-asesmen/" 
                 };
                 state.view = 'action';
+            } else if (type === 'broadcastWA') {
+                state.actionType = 'broadcastWA';
+                state.selectedItem = { 
+                    name: "Broadcast WA", 
+                    linkBroadcastWA: "https://wartam-mjng.github.io/broadcast-WA/" 
+                };
+                state.view = 'action';
             } else {
                 state.actionType = type;
                 state.view = 'list';
@@ -276,7 +290,7 @@
         }
 
         function handleBackToList() {
-            if(state.actionType === 'input' || state.actionType === 'dataSiswa' || state.actionType === 'asesmen') {
+            if(state.actionType === 'input' || state.actionType === 'dataSiswa' || state.actionType === 'asesmen' || state.actionType === 'broadcastWA') {
                 state.view = 'dashboard';
                 state.actionType = null;
             } else {
@@ -351,6 +365,7 @@
                             
                             ${renderDashboardButton('checkPresensi', 'Presensi', 'teal', 'Presensi Kelas', 'Data kehadiran')}
                             ${renderDashboardButton('groupWA', 'WA', 'emerald', 'Group WA', 'Komunikasi kelas')}
+                            ${renderDashboardButton('broadcastWA', 'Pesan', 'emerald', 'Broadcast WA', 'Kirim pesan massal')}
                             ${renderDashboardButton('input', 'Nilai', 'green', 'Input Nilai', 'Form input')}
                             ${renderDashboardButton('check', 'Siswa', 'blue', 'Cek Nilai', 'Daftar nilai')}
                             ${renderDashboardButton('dataSiswa', 'Data', 'cyan', 'Data Siswa', 'Database murid')}
@@ -370,6 +385,7 @@
             if(id === 'administrasiWali') icon = 'user-cog';
             if(id === 'checkPresensi') icon = 'user-check';
             if(id === 'groupWA') icon = 'message-circle';
+            if(id === 'broadcastWA') icon = 'send';
             if(id === 'dataSiswa') icon = 'graduation-cap';
             if(id === 'asesmen') icon = 'file-check-2';
             if(id === 'input') icon = 'file-input';
