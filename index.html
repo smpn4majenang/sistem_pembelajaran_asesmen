@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Pembelajaran dan Asesmen - SMPN 4 Majenang</title>
+    <!-- V2: +badge status endpoint, +banner peringatan, +kode verifikasi opsional, +pesan error informatif -->
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -167,6 +168,9 @@
     <script>
         const GOOGLE_SHEET_ID = "1TAq2LiT663wxPHwbWBnRN1KbkjBnGMwcU5PgsZWiQpg"; 
         const WA_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTelgSCLiUWXiCc--AXy2v2D9HxUluRA22CTcyFuj3vC8qZQKYekeBocu3tjPRr9-FLENsThClSinNX/pub?output=csv";
+        // ===== V2: konfigurasi tambahan =====
+        const STATUS_URL = "status_endpoint.json"; // dibuat oleh cek_endpoint_jurnal.py (opsional)
+        const KODE_SHEET_URL = ""; // opsional: URL CSV publik "Nama,Kode" untuk verifikasi guru
 
         let state = {
             view: 'dashboard', 
@@ -177,7 +181,10 @@
             classes: [],
             attendanceClasses: [],
             waGroups: [],
-            loading: true
+            loading: true,
+            statusJurnal: {},   // V2: "Jurnal Guru|Nama" -> "hidup" | "mati"
+            statusTanggal: null, // V2: kapan terakhir diperiksa
+            kodeAkses: {}        // V2: nama (lowercase) -> kode verifikasi
         };
 
         // KONFIGURASI COLOR PALETTE STATIS UNTUK TAILWIND CDN
@@ -227,12 +234,85 @@
                 state.classes = data.classes;
                 state.attendanceClasses = data.attendanceClasses;
                 state.waGroups = data.waGroups;
+                await muatStatusJurnal();            // V2 (opsional, gagal = diabaikan)
+                if (KODE_SHEET_URL) await muatKodeAkses(); // V2 (opsional)
                 state.loading = false;
-                render(); 
+                render();
             } catch (e) {
                 console.error(e);
-                renderError("Gagal memuat data dari Google Sheets. Pastikan Spreadsheet sudah di-Publish ke Web atau diatur 'Siapa saja yang memiliki link dapat melihat'.");
+                renderError();
             }
+        }
+
+        // ===== V2: status kesehatan endpoint jurnal =====
+        async function muatStatusJurnal() {
+            try {
+                const r = await fetch(STATUS_URL, { cache: 'no-store' });
+                if (!r.ok) return;
+                const j = await r.json();
+                state.statusJurnal = j.endpoint || {};
+                state.statusTanggal = j.diperiksa || null;
+            } catch (e) { /* file opsional: abaikan bila tidak ada */ }
+        }
+
+        // ===== V2: kode verifikasi guru (CSV publik: kolom Nama,Kode) =====
+        async function muatKodeAkses() {
+            try {
+                const r = await fetch(KODE_SHEET_URL, { cache: 'no-store' });
+                if (!r.ok) return;
+                const rows = parseCSV(await r.text());
+                rows.slice(1).forEach(row => {
+                    const nama = (row[0] || '').trim();
+                    const kode = (row[1] || '').trim();
+                    if (nama && kode) state.kodeAkses[nama.toLowerCase()] = kode;
+                });
+            } catch (e) { /* opsional: abaikan */ }
+        }
+
+        // ===== V2: status 'hidup' | 'mati' | null untuk item jurnal =====
+        function statusItem(jenis, nama) {
+            const s = state.statusJurnal[jenis + '|' + nama];
+            return s === 'hidup' ? 'hidup' : (s === 'mati' ? 'mati' : null);
+        }
+
+        // ===== V2: banner peringatan di dashboard =====
+        function bannerStatus() {
+            const mati = Object.entries(state.statusJurnal).filter(([k, v]) => v === 'mati');
+            if (!mati.length) return '';
+            const nama = mati.map(([k]) => k.split('|')[1]).join(', ');
+            const tgl = state.statusTanggal ? ` (data per ${state.statusTanggal})` : '';
+            return `
+                <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-r-xl px-5 py-4 shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="alert-triangle" width="22" class="text-red-600 shrink-0 mt-0.5"></i>
+                        <div>
+                            <p class="font-bold text-red-800 text-sm">&#9888;&#65039; ${mati.length} form jurnal terpantau bermasalah${tgl}</p>
+                            <p class="text-red-700 text-xs mt-1">${nama} &mdash; bila gagal mengirim jurnal, segera hubungi admin untuk redeploy.</p>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        // ===== V2: badge status pada kartu guru/kelas =====
+        function badgeStatus(item) {
+            let jenis = null;
+            if (state.actionType === 'jurnalGuru') jenis = 'Jurnal Guru';
+            else if (state.actionType === 'jurnalKelas') jenis = 'Jurnal Kelas';
+            if (!jenis) return '';
+            const s = statusItem(jenis, item.name);
+            if (s === 'hidup') return `<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded border border-green-200" title="Server jurnal terpantau normal">&#128994; Normal</span>`;
+            if (s === 'mati') return `<span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded border border-red-200" title="Server jurnal bermasalah &mdash; hubungi admin">&#128308; Bermasalah</span>`;
+            return '';
+        }
+
+        // ===== V2: strip peringatan di tampilan form =====
+        function stripStatus() {
+            let jenis = null;
+            if (state.actionType === 'jurnalGuru') jenis = 'Jurnal Guru';
+            else if (state.actionType === 'jurnalKelas') jenis = 'Jurnal Kelas';
+            if (!jenis || !state.selectedItem) return '';
+            if (statusItem(jenis, state.selectedItem.name) !== 'mati') return '';
+            return `<div class="bg-red-600 text-white text-xs px-4 py-2 text-center font-medium">&#9888;&#65039; Server jurnal ini terpantau bermasalah. Bila muncul "Gagal Mengirim", jangan mengulang terus &mdash; hubungi admin.</div>`;
         }
 
         function toggleSidebar() {
@@ -310,6 +390,15 @@
             else item = state.teachers.find(t => t.id === itemId);
 
             if (item) {
+                // ===== V2: kode verifikasi (hanya bila terdaftar untuk nama ini) =====
+                if (state.actionType === 'jurnalGuru' || state.actionType === 'jurnalKelas') {
+                    const kode = state.kodeAkses[(item.name || '').toLowerCase()];
+                    if (kode) {
+                        const isi = prompt(`Masukkan kode verifikasi untuk "${item.name}":`);
+                        if (isi === null) return; // pengguna batal
+                        if (isi.trim() !== kode) { alert('Kode salah. Akses ditolak.'); return; }
+                    }
+                }
                 state.selectedItem = item;
                 state.view = 'action';
                 render();
@@ -351,6 +440,7 @@
                         <h2 class="text-2xl font-bold text-gray-800">Selamat Datang 👋</h2>
                         <p class="text-gray-500">Sistem Informasi Pembelajaran dan Asesmen SMP Negeri 4 Majenang</p>
                     </div>
+                    ${bannerStatus()}
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <h3 class="font-bold text-gray-800 mb-4">Akses Cepat</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -449,7 +539,7 @@
                         </div>
                         <div class="min-w-0">
                             <h4 class="font-bold text-gray-900 truncate">${item.name}</h4>
-                            <div class="flex flex-wrap gap-1 mt-1">${subHtml}</div>
+                            <div class="flex flex-wrap gap-1 mt-1">${subHtml}${badgeStatus(item)}</div>
                         </div>
                     </div>
                     <div class="hidden sm:block"><i data-lucide="chevron-right" width="20" class="text-gray-300 group-hover:${cs.iconText}"></i></div>
@@ -503,6 +593,7 @@
                         </div>
                         ${!isInvalid ? `<a href="${link}" target="_blank" class="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 transition-colors"><span class="hidden sm:inline">Buka Tab Baru</span><i data-lucide="external-link" width="14"></i></a>` : ''}
                     </div>
+                    ${stripStatus()}
                     <div class="flex-1 relative bg-gray-100">
                         ${isInvalid ? `<div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center"><div class="bg-white p-6 rounded-xl shadow-lg max-w-sm"><h3 class="font-bold text-gray-800">Link Tidak Tersedia</h3><p class="text-sm text-gray-500 mt-1">Link tautan belum diatur pada Google Sheet.</p></div></div>` : 
                         `<div class="absolute top-0 left-0 w-full bg-yellow-50 px-3 py-1.5 text-[10px] text-yellow-800 flex justify-center gap-2 border-b border-yellow-100 z-10">${iframeNotice}</div><iframe src="${link}" class="w-full h-full border-none pt-6"></iframe>`}
@@ -583,14 +674,22 @@
             return rows;
         }
         
-        function renderError(msg) {
+        function renderError() {
             document.getElementById('main-content').innerHTML = `
                 <div class="flex flex-col items-center justify-center h-full p-8 text-center max-w-md mx-auto">
                     <div class="bg-red-50 text-red-600 p-4 rounded-full mb-4">
                         <i data-lucide="alert-triangle" width="32"></i>
                     </div>
-                    <h3 class="font-bold text-gray-800 text-lg mb-2">Terjadi Kesalahan</h3>
-                    <p class="text-sm text-gray-500 mb-6">${msg}</p>
+                    <h3 class="font-bold text-gray-800 text-lg mb-2">Data Tidak Dapat Dimuat</h3>
+                    <div class="text-sm text-gray-500 mb-6 text-left bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <p class="font-semibold text-gray-700 mb-2">Kemungkinan penyebab:</p>
+                        <ul class="list-disc ml-5 space-y-1">
+                            <li>Koneksi internet terputus atau tidak stabil.</li>
+                            <li>Spreadsheet konfigurasi belum di-Publish ke Web.</li>
+                            <li>Jaringan sekolah memblokir akses ke Google.</li>
+                        </ul>
+                        <p class="mt-3">Coba lagi beberapa saat. Bila tetap gagal, hubungi admin.</p>
+                    </div>
                     <button onclick="window.location.reload()" class="px-5 py-2.5 bg-blue-900 hover:bg-blue-800 text-white font-medium text-sm rounded-lg shadow-sm transition-colors">Coba Lagi</button>
                 </div>`;
             setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
